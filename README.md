@@ -1,5 +1,11 @@
 # VirtFS::XFS
 
+[![Gem Version](https://badge.fury.io/rb/virtfs-xfs.svg)](http://badge.fury.io/rb/virtfs-xfs)
+[![Build Status](https://travis-ci.org/ManageIQ/virtfs-xfs.svg)](https://travis-ci.org/ManageIQ/virtfs-xfs)
+[![Code Climate](https://codeclimate.com/github/ManageIQ/virtfs-xfs.svg)](https://codeclimate.com/github/ManageIQ/virtfs-xfs)
+[![Test Coverage](https://codeclimate.com/github/ManageIQ/virtfs-xfs/badges/coverage.svg)](https://codeclimate.com/github/ManageIQ/virtfs-xfs/coverage)
+[![Dependency Status](https://gemnasium.com/ManageIQ/virtfs-xfs.svg)](https://gemnasium.com/ManageIQ/virtfs-xfs)
+
 An XFS based filesystem module for VirtFS.
 
 ## Installation
