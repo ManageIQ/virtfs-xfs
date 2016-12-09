@@ -1,6 +1,6 @@
-require 'fs/xfs/inode'
+require_relative 'inode'
 
-module XFS
+module VirtFS::XFS
   BMAP_BTREE_ROOT_NODE_HEADER = BinaryStruct.new([
     'S>',          'level',           # B+Tree Level
     'S>',          'entry_count',     # Number of Key and Pointer Array Elements
@@ -35,12 +35,12 @@ module XFS
     attr_accessor   :level, :entry_count, :blocks
 
     def initialize(data, inode)
-      raise "XFS::BmapBTreeRootNode: Nil buffer" if data.nil?
+      raise "VirtFS::XFS::BmapBTreeRootNode: Nil buffer" if data.nil?
       @inode         = inode
       @header        = BMAP_BTREE_ROOT_NODE_HEADER.decode(data[0..inode.length])
       @level         = @header['level']
       @entry_count   = @header['entry_count']
-      raise "XFS::BmapBTreeRootNode: Invalid Root Node Level" if @level.nil? || @level == 0
+      raise "VirtFS::XFS::BmapBTreeRootNode: Invalid Root Node Level" if @level.nil? || @level == 0
       header_size    = SIZEOF_BMAP_BTREE_ROOT_NODE_HEADER
       return if @entry_count == 0
       #

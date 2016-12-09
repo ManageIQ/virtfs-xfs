@@ -1,7 +1,7 @@
-require 'fs/xfs/directory'
-require 'fs/xfs/superblock'
+require_relative 'directory'
+require_relative 'superblock'
 
-module XFS
+module Virtfs::XFS
   #
   # xfs_dir2_data_hdr consists of the magic number
   # followed by 3 copies of the xfs_dir2_data_free structure
@@ -24,4 +24,4 @@ module XFS
       @version_3     = false
     end
   end # class Directory3DataHeader
-end   # module XFS
+end   # module Virtfs::XFS

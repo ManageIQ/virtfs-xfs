@@ -1,16 +1,16 @@
 # encoding: US-ASCII
 
 require 'binary_struct'
-require 'util/miq-uuid'
+require 'virt_disk/disk_uuid'
 require 'stringio'
 require 'memory_buffer'
-require 'fs/xfs/allocation_group'
-require 'fs/xfs/inode_map'
-require 'fs/xfs/inode'
+require_relative 'allocation_group'
+require_relative 'inode_map'
+require_relative 'inode'
 
 require 'rufus/lru'
 
-module XFS
+module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
   # // Data definitions. Linux 2.6.2 from Fedora Core 6.
 
@@ -83,45 +83,45 @@ module XFS
     # filesystem allocation, and must equal 512.  Length units given to bio
     # routines are in BB's.
     #
-    BBSHIFT                                = 9
-    BBSIZE                                 = 1 << BBSHIFT
-    XFS_INODE_BIG_CLUSTER_SIZE             = 8192
-    XFS_NBBY                               = 8                   # number of bits in a byte
-    XFS_INODES_PER_CHUNK                   = XFS_NBBY * 8
-    XFS_DINODE_MIN_LOG                     = 8
-    XFS_DINODE_MIN_SIZE                    = 1 << XFS_DINODE_MIN_LOG
-    DEF_BLOCK_CACHE_SIZE                   = 500
-    DEF_CLUSTER_CACHE_SIZE                 = 500
-    DEF_INODE_CACHE_SIZE                   = 500
-    DEF_AG_CACHE_SIZE                      = 10
-    XFS_SUPERBLOCK_MAGIC                   = 0x58465342
-    XFS_SUPERBLOCK_VERSION_1               = 1           # 5.3, 6.0.1, 6.1 */
-    XFS_SUPERBLOCK_VERSION_2               = 2           # 6.2 - attributes */
-    XFS_SUPERBLOCK_VERSION_3               = 3           # 6.2 - new inode version */
-    XFS_SUPERBLOCK_VERSION_4               = 4           # 6.2+ - bitmask version */
-    XFS_SUPERBLOCK_VERSION_5               = 5           # CRC enabled filesystem */
-    XFS_SUPERBLOCK_VERSION_NUMBITS         = 0x000f
-    XFS_SUPERBLOCK_VERSION_ALLFBITS        = 0xfff0
-    XFS_SUPERBLOCK_VERSION_SASHFBITS       = 0xf000
-    XFS_SUPERBLOCK_VERSION_REALFBITS       = 0x0ff0
-    XFS_SUPERBLOCK_VERSION_ATTRBIT         = 0x0010
-    XFS_SUPERBLOCK_VERSION_NLINKBIT        = 0x0020
-    XFS_SUPERBLOCK_VERSION_QUOTABIT        = 0x0040
-    XFS_SUPERBLOCK_VERSION_ALIGNBIT        = 0x0080
-    XFS_SUPERBLOCK_VERSION_DALIGNBIT       = 0x0100
-    XFS_SUPERBLOCK_VERSION_SHAREDBIT       = 0x0200
-    XFS_SUPERBLOCK_VERSION_LOGV2BIT        = 0x0400
-    XFS_SUPERBLOCK_VERSION_SECTORBIT       = 0x0800
-    XFS_SUPERBLOCK_VERSION_EXTFLGBIT       = 0x1000
-    XFS_SUPERBLOCK_VERSION_DIRV2BIT        = 0x2000
-    XFS_SUPERBLOCK_VERSION_BORGBIT         = 0x4000      # ASCII only case-insens. */
-    XFS_SUPERBLOCK_VERSION_MOREBITSBIT     = 0x8000
+    BBSHIFT                            = 9
+    BBSIZE                             = 1 << BBSHIFT
+    XFS_INODE_BIG_CLUSTER_SIZE         = 8192
+    XFS_NBBY                           = 8                   # number of bits in a byte
+    XFS_INODES_PER_CHUNK               = XFS_NBBY * 8
+    XFS_DINODE_MIN_LOG                 = 8
+    XFS_DINODE_MIN_SIZE                = 1 << XFS_DINODE_MIN_LOG
+    DEF_BLOCK_CACHE_SIZE               = 500
+    DEF_CLUSTER_CACHE_SIZE             = 500
+    DEF_INODE_CACHE_SIZE               = 500
+    DEF_AG_CACHE_SIZE                  = 10
+    XFS_SUPERBLOCK_MAGIC               = 0x58465342
+    XFS_SUPERBLOCK_VERSION_1           = 1           # 5.3, 6.0.1, 6.1 */
+    XFS_SUPERBLOCK_VERSION_2           = 2           # 6.2 - attributes */
+    XFS_SUPERBLOCK_VERSION_3           = 3           # 6.2 - new inode version */
+    XFS_SUPERBLOCK_VERSION_4           = 4           # 6.2+ - bitmask version */
+    XFS_SUPERBLOCK_VERSION_5           = 5           # CRC enabled filesystem */
+    XFS_SUPERBLOCK_VERSION_NUMBITS     = 0x000f
+    XFS_SUPERBLOCK_VERSION_ALLFBITS    = 0xfff0
+    XFS_SUPERBLOCK_VERSION_SASHFBITS   = 0xf000
+    XFS_SUPERBLOCK_VERSION_REALFBITS   = 0x0ff0
+    XFS_SUPERBLOCK_VERSION_ATTRBIT     = 0x0010
+    XFS_SUPERBLOCK_VERSION_NLINKBIT    = 0x0020
+    XFS_SUPERBLOCK_VERSION_QUOTABIT    = 0x0040
+    XFS_SUPERBLOCK_VERSION_ALIGNBIT    = 0x0080
+    XFS_SUPERBLOCK_VERSION_DALIGNBIT   = 0x0100
+    XFS_SUPERBLOCK_VERSION_SHAREDBIT   = 0x0200
+    XFS_SUPERBLOCK_VERSION_LOGV2BIT    = 0x0400
+    XFS_SUPERBLOCK_VERSION_SECTORBIT   = 0x0800
+    XFS_SUPERBLOCK_VERSION_EXTFLGBIT   = 0x1000
+    XFS_SUPERBLOCK_VERSION_DIRV2BIT    = 0x2000
+    XFS_SUPERBLOCK_VERSION_BORGBIT     = 0x4000      # ASCII only case-insens. */
+    XFS_SUPERBLOCK_VERSION_MOREBITSBIT = 0x8000
 
-    XFS_SUPERBLOCK_VERSION_OKSASHFBITS     = XFS_SUPERBLOCK_VERSION_EXTFLGBIT | XFS_SUPERBLOCK_VERSION_DIRV2BIT | XFS_SUPERBLOCK_VERSION_BORGBIT
+    XFS_SUPERBLOCK_VERSION_OKSASHFBITS = XFS_SUPERBLOCK_VERSION_EXTFLGBIT | XFS_SUPERBLOCK_VERSION_DIRV2BIT | XFS_SUPERBLOCK_VERSION_BORGBIT
 
-    XFS_SUPERBLOCK_VERSION_OKREALFBITS     = XFS_SUPERBLOCK_VERSION_ATTRBIT | XFS_SUPERBLOCK_VERSION_NLINKBIT | XFS_SUPERBLOCK_VERSION_QUOTABIT | XFS_SUPERBLOCK_VERSION_ALIGNBIT | XFS_SUPERBLOCK_VERSION_DALIGNBIT | XFS_SUPERBLOCK_VERSION_SHAREDBIT | XFS_SUPERBLOCK_VERSION_LOGV2BIT | XFS_SUPERBLOCK_VERSION_SECTORBIT | XFS_SUPERBLOCK_VERSION_MOREBITSBIT
+    XFS_SUPERBLOCK_VERSION_OKREALFBITS = XFS_SUPERBLOCK_VERSION_ATTRBIT | XFS_SUPERBLOCK_VERSION_NLINKBIT | XFS_SUPERBLOCK_VERSION_QUOTABIT | XFS_SUPERBLOCK_VERSION_ALIGNBIT | XFS_SUPERBLOCK_VERSION_DALIGNBIT | XFS_SUPERBLOCK_VERSION_SHAREDBIT | XFS_SUPERBLOCK_VERSION_LOGV2BIT | XFS_SUPERBLOCK_VERSION_SECTORBIT | XFS_SUPERBLOCK_VERSION_MOREBITSBIT
 
-    XFS_SUPERBLOCK_VERSION_OKREALBITS      = XFS_SUPERBLOCK_VERSION_NUMBITS | XFS_SUPERBLOCK_VERSION_OKREALFBITS |
+    XFS_SUPERBLOCK_VERSION_OKREALBITS  = XFS_SUPERBLOCK_VERSION_NUMBITS | XFS_SUPERBLOCK_VERSION_OKREALFBITS |
                                              XFS_SUPERBLOCK_VERSION_OKSASHFBITS
 
     #
@@ -157,19 +157,19 @@ module XFS
     def validate_sb(agno)
       # Grab some quick facts & make sure there's nothing wrong. Tight qualification.
       if @sb['magic_num'] != XFS_SUPERBLOCK_MAGIC
-        raise "XFS::Superblock.initialize: Invalid magic number=[#{@sb['magic_num']}] in AG #{agno}"
+        raise "Virtfs::XFS::Superblock.initialize: Invalid magic number=[#{@sb['magic_num']}] in AG #{agno}"
       end
       unless good_version?
-        $log.warn "XFS::Superblock.initialize: Bad Superblock version # #{@sb['version_number']} in AG #{agno}"
+        $log.warn "Virtfs::XFS::Superblock.initialize: Bad Superblock version # #{@sb['version_number']} in AG #{agno}"
         $log.warn "Attempting to access filesystem"
       end
       if agno == 0 && @sb['in_progress'] != 0
-        $log.warn "XFS::Superblock.initialize: mkfs not completed successfully. Attempting to access filesystem"
+        $log.warn "Virtfs::XFS::Superblock.initialize: mkfs not completed successfully. Attempting to access filesystem"
       end
     end
 
     def initialize(stream, agno = 0)
-      raise "XFS::Superblock.initialize: Nil stream" if stream.nil?
+      raise "Virtfs::XFS::Superblock.initialize: Nil stream" if stream.nil?
       @stream = stream
 
       #
@@ -188,14 +188,14 @@ module XFS
       @allocation_group_cache = LruHash.new(DEF_AG_CACHE_SIZE)
 
       # expose for testing.
-      @block_count            = @sb['data_blocks']
-      @inode_count            = @sb['inode_count']
-      @inode_size             = @sb['inode_size']
-      @root_inode             = @sb['root_inode_num']
+      @block_count = @sb['data_blocks']
+      @inode_count = @sb['inode_count']
+      @inode_size  = @sb['inode_size']
+      @root_inode  = @sb['root_inode_num']
 
       # Inode file size members can't be trusted, so use sector count instead.
       # MiqDisk exposes block_size, which for our purposes is sector_size.
-      @sector_size            = @stream.blockSize
+      @sector_size = @stream.blockSize
 
       # Preprocess some members.
       @sb['fs_name'].delete!("\000")
@@ -203,10 +203,10 @@ module XFS
       @allocation_group_blocks          = @sb['ag_blocks']
       @groups_count, @last_group_blocks = @sb['data_blocks'].divmod(@allocation_group_blocks)
       @groups_count += 1 if @last_group_blocks > 0
-      @filesystem_id                    = MiqUUID.parse_raw(@sb['uuid'])
-      @volume_name                      = @sb['fs_name']
-      @ialloc_inos                      = (@sb['inodes_per_blk']..XFS_INODES_PER_CHUNK).max
-      @ialloc_blks                      = @ialloc_inos >> @sb['inodes_per_blk_log']
+      @filesystem_id = MiqUUID.parse_raw(@sb['uuid'])
+      @volume_name   = @sb['fs_name']
+      @ialloc_inos   = (@sb['inodes_per_blk']..XFS_INODES_PER_CHUNK).max
+      @ialloc_blks   = @ialloc_inos >> @sb['inodes_per_blk_log']
     end
 
     # ////////////////////////////////////////////////////////////////////////////
@@ -429,38 +429,38 @@ module XFS
       cluster_size >> @sb['block_size_log']
     end
 
-    def get_ag(agno)
+    def ag(agno)
       unless @allocation_group_cache.key?(agno)
-        blk_num  = ag_daddr(agno, agf_daddr)
+        blk_num = ag_daddr(agno, agf_daddr)
         @stream.seek(fsb_to_b(blk_num))
         @allocation_group_cache[agno] = AllocationGroup.new(@stream, agno, @sb)
       end
       @allocation_group_cache[agno]
     end
 
-    def get_agi(agno)
-      get_ag(agno).agi
+    def agi(agno)
+      ag(agno).agi
     end
 
-    def get_agf(agno)
-      get_ag(agno).agf
+    def agf(agno)
+      ag(agno).agf
     end
 
-    def get_agblock(agno)
-      get_ag(agno).agblock
+    def ag_block(agno)
+      ag(agno).ag_block
     end
 
     def inode_btree_record
       InodeBtreeRecord.new(cursor)
     end
 
-    def get_inode(inode)
+    def inode(inode)
       unless @inode_cache.key?(inode)
         inode_map = InodeMap.new(inode, self)
         if icluster_size_fsb == 1
-          buf = get_block(inode_map.inode_blkno)
+          buf = block(inode_map.inode_blkno)
         else
-          buf = get_cluster(inode_map.inode_blkno)
+          buf = cluster(inode_map.inode_blkno)
         end
         @inode_cache[inode] = Inode.new(buf, inode_map.inode_boffset, self, inode)
       end
@@ -468,8 +468,8 @@ module XFS
       @inode_cache[inode]
     end
 
-    def get_cluster(block)
-      raise "XFS::Superblock.get_cluster: block is nil" if block.nil?
+    def cluster(block)
+      raise "Virtfs::XFS::Superblock.cluster: block is nil" if block.nil?
       @cluster_cache[block] = MemoryBuffer.create(@block_size * icluster_size_fsb) if block == 0
       unless @cluster_cache.key?(block)
         @stream.seek(fsb_to_b(block))
@@ -478,8 +478,8 @@ module XFS
       @cluster_cache[block]
     end
 
-    def get_block(block)
-      raise "XFS::Superblock.get_block: block is nil" if block.nil?
+    def block(block)
+      raise "Virtfs::XFS::Superblock.block: block is nil" if block.nil?
       @block_cache[block] = MemoryBuffer.create(@block_size) if block == 0
       unless @block_cache.key?(block)
         @stream.seek(fsb_to_b(block))
@@ -491,7 +491,7 @@ module XFS
     # ////////////////////////////////////////////////////////////////////////////
     # // Utility functions.
 
-    def got_bit?(field, bit)
+    def bit?(field, bit)
       field & bit == bit
     end
 
@@ -553,4 +553,4 @@ module XFS
       out
     end
   end # class Superblock
-end # module XFS
+end # module Virtfs::XFS

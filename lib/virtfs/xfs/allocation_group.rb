@@ -1,12 +1,12 @@
 require 'binary_struct'
-require 'util/miq-uuid'
+require 'virt_disk/disk_uuid'
 require 'stringio'
 require 'memory_buffer'
-require 'fs/xfs/superblock'
+require_relative 'superblock'
 
 require 'rufus/lru'
 
-module XFS
+module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
 
   AG_FREESPACE = BinaryStruct.new([
@@ -103,7 +103,7 @@ module XFS
     attr_reader :stream, :agf, :agi, :agfl, :allocation_group_block
 
     def initialize(stream, _agno, sb)
-      raise "XFS::AllocationGroup.initialize: Nil stream" if stream.nil?
+      raise "VirtFS::XFS::AllocationGroup.initialize: Nil stream" if stream.nil?
       #
       # The stream should be pointing at the Allocation Group to be built on the disk.
       #
@@ -119,11 +119,11 @@ module XFS
 
       # Grab some quick facts & make sure there's nothing wrong. Tight qualification.
       if @agf['magic_num'] != XFS_AGF_MAGIC
-        raise "XFS::AllocationGroup.initialize: Invalid AGF magic number=[#{@agf['magic_num']}]"
+        raise "VirtFS::XFS::AllocationGroup.initialize: Invalid AGF magic number=[#{@agf['magic_num']}]"
       elsif @agi['magic_num'] != XFS_AGI_MAGIC
-        raise "XFS::AllocationGroup.initialize: Invalid AGI magic number=[#{@agi['magic_num']}]"
+        raise "VirtFS::XFS::AllocationGroup.initialize: Invalid AGI magic number=[#{@agi['magic_num']}]"
       elsif @agfl['magic_num'] != XFS_AGFL_MAGIC
-        raise "XFS::AllocationGroup.initialize: Invalid AGFL magic number=[#{@agfl['magic_num']}]"
+        raise "VirtFS::XFS::AllocationGroup.initialize: Invalid AGFL magic number=[#{@agfl['magic_num']}]"
       end
     end
 
@@ -157,4 +157,4 @@ module XFS
       out
     end
   end # class AllocationGroup
-end # module XFS
+end # module VirtFS::XFS

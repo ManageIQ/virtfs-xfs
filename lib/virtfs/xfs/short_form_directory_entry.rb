@@ -1,7 +1,7 @@
 require 'binary_struct'
-require 'fs/xfs/inode'
+require_relative 'inode'
 
-module XFS
+module Virtfs::XFS
   # ////////////////////////////////////////////////////////////////////////////
   # // Data definitions.
   #
@@ -60,14 +60,14 @@ module XFS
       # "." and ".." directory entries.
       #
       return dot_entry(dots, inode_number) if dots
-      raise "XFS::ShortFormDirectoryEntry.initialize: Nil directory entry data" if data.nil?
+      raise "VirtFS::XFS::ShortFormDirectoryEntry.initialize: Nil directory entry data" if data.nil?
       siz              = SIZEOF_SHORT_FORM_DIRECTORY_ENTRY
       @directory_entry = SHORT_FORM_DIRECTORY_ENTRY.decode(data[0..siz])
       @name_length     = @directory_entry['name_length']
       unless @name_length == 0
-        @name = data[siz, @name_length]
+        @name        = data[siz, @name_length]
         @name_length += 1 if sb.version_has_crc?
-        start = siz + @name_length
+        start        = siz + @name_length
         if short_inode
           ino_size = SIZEOF_SHORT_FORM_SHORT_INO
           inode    = SHORT_FORM_SHORT_INO.decode(data[start..(start + ino_size)])
@@ -75,8 +75,8 @@ module XFS
           ino_size = SIZEOF_SHORT_FORM_LONG_INO
           inode    = SHORT_FORM_LONG_INO.decode(data[start..(start + ino_size)])
         end
-        @length    = start + ino_size
-        @inode     = inode['inode_num']
+        @length = start + ino_size
+        @inode  = inode['inode_num']
       end
     end
 
@@ -88,4 +88,4 @@ module XFS
       out
     end
   end # class
-end # module
+end # module Virtfs::XFS

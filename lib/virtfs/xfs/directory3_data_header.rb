@@ -1,7 +1,7 @@
-require 'fs/xfs/directory'
-require 'fs/xfs/superblock'
+require_relative 'directory'
+require_relative 'superblock'
 
-module XFS
+module Virtfs::XFS
   DIRECTORY3_DATA_HEADER = BinaryStruct.new([
     'I>',  'magic',               # magic number
     'I>',  'crc',                 # CRC of block
@@ -31,4 +31,4 @@ module XFS
       super
     end
   end # class Directory3DataHeader
-end   # module XFS
+end   # module Virtfs::XFS

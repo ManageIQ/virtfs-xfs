@@ -1,4 +1,4 @@
-module XFS
+module Virtfs::XFS
   #
   # xfs_dir2_data_hdr consists of the magic number
   # followed by 3 copies of the xfs_dir2_data_free structure
@@ -19,4 +19,4 @@ module XFS
       @size  = SIZEOF_DIRECTORY_BLOCK_TAIL
     end
   end # class DirectoryBlockTail
-end   # module XFS
+end   # module Virtfs::XFS

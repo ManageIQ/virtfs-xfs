@@ -1,10 +1,10 @@
 require 'binary_struct'
-require 'util/miq-uuid'
+require 'virt_disk/disk_uuid'
 require 'stringio'
 
 require 'rufus/lru'
 
-module XFS
+module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
 
   BTREE_BLOCK_SHORT_NOCRC = BinaryStruct.new([
@@ -122,4 +122,4 @@ module XFS
       len
     end
   end # class BTreeBlock
-end # module XFS
+end # module VirtFS::XFS

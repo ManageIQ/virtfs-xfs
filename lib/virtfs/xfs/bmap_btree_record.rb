@@ -1,4 +1,4 @@
-module XFS
+module VirtFS::XFS
   BMAP_BTREE_REC = BinaryStruct.new([
     'Q>',          'l0',
     'Q>',          'l1',
@@ -20,40 +20,40 @@ module XFS
       (1 << shift) - 1
     end
 
-    def bmbt_get_state(doubleword)
+    def bmbt_state(doubleword)
       flag = doubleword >> (64 - BMBT_EXNTFLAG_BITLEN)
       return XFS_EXT_UNWRITTEN if flag > 0
       XFS_EXT_NORM
     end
 
-    def bmbt_get_block_count(doubleword)
+    def bmbt_block_count(doubleword)
       doubleword & xfs_mask64lo(21)
     end
 
-    def bmbt_get_start_offset(doubleword)
+    def bmbt_start_offset(doubleword)
       (doubleword & xfs_mask64lo(64 - BMBT_EXNTFLAG_BITLEN)) >> 9
     end
 
-    def bmbt_get_start_block(doubleword)
+    def bmbt_start_block(doubleword)
       doubleword >> 21
     end
 
-    def bmbt_get_big_start_block(word0, word1)
+    def bmbt_big_start_block(word0, word1)
       ((word0 & xfs_mask64lo(9) << 43)) | (word1 >> 21)
     end
 
     def initialize(data, sb)
-      raise "XFS::BmapBTreeRec: Nil buffer" if data.nil?
-      @record          = BMAP_BTREE_REC.decode(data)
-      @start_offset    = bmbt_get_start_offset(@record['l0'])
-      start_block     = bmbt_get_start_block(@record['l1'])
-      big_start_block = bmbt_get_big_start_block(@record['l0'], @record['l1'])
-      @block_count     = bmbt_get_block_count(@record['l1'])
-      @flag            = bmbt_get_state(@record['l0'])
-      agno             = sb.fsb_to_agno(start_block)
-      agbno            = sb.fsb_to_agbno(start_block)
-      @start_block     = sb.agbno_to_real_block(agno, agbno)
-      agno             = sb.fsb_to_agno(big_start_block)
+      raise "VirtFS::XFS::BmapBTreeRec: Nil buffer" if data.nil?
+      @record         = BMAP_BTREE_REC.decode(data)
+      @start_offset   = bmbt_start_offset(@record['l0'])
+      start_block     = bmbt_start_block(@record['l1'])
+      big_start_block = bmbt_big_start_block(@record['l0'], @record['l1'])
+      @block_count    = bmbt_block_count(@record['l1'])
+      @flag           = bmbt_state(@record['l0'])
+      agno            = sb.fsb_to_agno(start_block)
+      agbno           = sb.fsb_to_agbno(start_block)
+      @start_block    = sb.agbno_to_real_block(agno, agbno)
+      agno            = sb.fsb_to_agno(big_start_block)
       agbno            = sb.fsb_to_agbno(big_start_block)
       @big_start_block = sb.agbno_to_real_block(agno, agbno)
     end

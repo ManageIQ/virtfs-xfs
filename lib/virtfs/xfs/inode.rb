@@ -1,12 +1,12 @@
 require 'binary_struct'
 require 'memory_buffer'
 require 'more_core_extensions/all'
-require 'fs/xfs/superblock'
-require 'fs/xfs/bmap_btree_record'
-require 'fs/xfs/bmap_btree_block'
-require 'fs/xfs/bmap_btree_root_node'
+require_relative 'superblock'
+require_relative 'bmap_btree_record'
+require_relative 'bmap_btree_block'
+require_relative 'bmap_btree_root_node'
 
-module XFS
+module Virtfs::XFS
   TIMESTAMP = BinaryStruct.new([
     'I',  'seconds',           # timestamp seconds
     'I',  'nanoseconds',       # timestamp nanoseconds
@@ -94,19 +94,19 @@ module XFS
   # // Class.
 
   class Inode
-    MAX_READ              = 4_294_967_296
-    XFS_DINODE_MAGIC             = 0x494e
+    MAX_READ         = 4_294_967_296
+    XFS_DINODE_MAGIC = 0x494e
 
     # Bits 0 to 8 of file mode.
-    PF_O_EXECUTE  = 0x0001  # owner execute
-    PF_O_WRITE    = 0x0002  # owner write
-    PF_O_READ     = 0x0004  # owner read
-    PF_G_EXECUTE  = 0x0008  # group execute
-    PF_G_WRITE    = 0x0010  # group write
-    PF_G_READ     = 0x0020  # group read
-    PF_U_EXECUTE  = 0x0040  # user execute
-    PF_U_WRITE    = 0x0080  # user write
-    PF_U_READ     = 0x0100  # user read
+    PF_O_EXECUTE = 0x0001  # owner execute
+    PF_O_WRITE   = 0x0002  # owner write
+    PF_O_READ    = 0x0004  # owner read
+    PF_G_EXECUTE = 0x0008  # group execute
+    PF_G_WRITE   = 0x0010  # group write
+    PF_G_READ    = 0x0020  # group read
+    PF_U_EXECUTE = 0x0040  # user execute
+    PF_U_WRITE   = 0x0080  # user write
+    PF_U_READ    = 0x0100  # user read
 
     # For accessor convenience.
     MSK_PERM_OWNER = (PF_O_EXECUTE | PF_O_WRITE | PF_O_READ)
@@ -114,23 +114,23 @@ module XFS
     MSK_PERM_USER  = (PF_U_EXECUTE | PF_U_WRITE | PF_U_READ)
 
     # Bits 12 to 15 of file mode.
-    FM_FIFO       = 0x1000  # fifo device (pipe)
-    FM_CHAR       = 0x2000  # char device
-    FM_DIRECTORY  = 0x4000  # directory
-    FM_BLOCK_DEV  = 0x6000  # block device
-    FM_FILE       = 0x8000  # regular file
-    FM_SYM_LNK    = 0xa000  # symbolic link
-    FM_SOCKET     = 0xc000  # socket device
+    FM_FIFO      = 0x1000  # fifo device (pipe)
+    FM_CHAR      = 0x2000  # char device
+    FM_DIRECTORY = 0x4000  # directory
+    FM_BLOCK_DEV = 0x6000  # block device
+    FM_FILE      = 0x8000  # regular file
+    FM_SYM_LNK   = 0xa000  # symbolic link
+    FM_SOCKET    = 0xc000  # socket device
 
     # Values our callers may know
-    FT_UNKNOWN    = 0
-    FT_FILE       = 1
-    FT_DIRECTORY  = 2
-    FT_CHAR       = 3
-    FT_BLOCK      = 4
-    FT_FIFO       = 5
-    FT_SOCKET     = 6
-    FT_SYM_LNK    = 7
+    FT_UNKNOWN   = 0
+    FT_FILE      = 1
+    FT_DIRECTORY = 2
+    FT_CHAR      = 3
+    FT_BLOCK     = 4
+    FT_FIFO      = 5
+    FT_SOCKET    = 6
+    FT_SYM_LNK   = 7
 
     FILE_MODE_TO_FILE_TYPE_LOOKUP_TABLE = {
       FM_FIFO      => FT_FIFO,
@@ -156,8 +156,8 @@ module XFS
     XFS_DATA_FORK = 0
     XFS_ATTR_FORK = 1
 
-    def dinode_good_version(version)
-      version >= 1 && version <= 3
+    def valid_version?
+      @in['version'] >= 1 && @in['version'] <=3
     end
 
     def dinode_size(version)
@@ -204,44 +204,46 @@ module XFS
     attr_reader :mode, :flags, :length, :disk_buffer, :version, :inode_number, :sb, :data_method, :in
     attr_accessor :data_fork, :attribute_fork
 
-    def valid_inode?
-      $log.error "XFS::Inode: Bad Magic # inode #{@inode_number}" unless @in['magic'] == XFS_DINODE_MAGIC
-      raise "XFS::Inode: Invalid Magic Number for inode #{@inode_number}"  unless @in['magic'] == XFS_DINODE_MAGIC
-      raise "XFS::Inode: Invalid Inode Version for inode #{@inode_number}" unless dinode_good_version(@in['version'])
+    def valid?
+      $log.error "VirtFS::XFS::Inode: Bad Magic # inode #{@inode_number}" unless valid_magic?
+      raise "VirtFS::XFS::Inode: Invalid Magic Number for inode #{@inode_number}"  unless valid_magic?
+      raise "VirtFS::XFS::Inode: Invalid Inode Version for inode #{@inode_number}" unless valid_version?
       true
+    end
+
+    def valid_magic?
+      @in['magic'] == XFS_DINODE_MAGIC
     end
 
     def inode_format
       if @format == XFS_DINODE_FMT_LOCAL
-        data_method    = :local
+        return :local
       elsif @format == XFS_DINODE_FMT_EXTENTS
-        data_method    = :extents
-      else
-        data_method    = :btree
+        return :extents
       end
-      data_method
+      :btree
     end
 
     def initialize(buffer, offset, superblock, inode_number)
-      raise "XFS::Inode: Nil buffer for inode #{inode_number}" if buffer.nil?
-      @sb               = superblock
-      @inode_number     = inode_number
-      @offset           = offset
+      raise "VirtFS::XFS::Inode: Nil buffer for inode #{inode_number}" if buffer.nil?
+      @sb           = superblock
+      @inode_number = inode_number
+      @offset       = offset
       if @sb.inode_size < SIZEOF_EXTENDED_INODE
-        @in             = INODE.decode(buffer[offset..(offset + SIZEOF_INODE)])
+        @in = INODE.decode(buffer[offset..(offset + SIZEOF_INODE)])
       else
-        @in             = EXTENDED_INODE.decode(buffer[offset..(offset + SIZEOF_EXTENDED_INODE)])
+        @in = EXTENDED_INODE.decode(buffer[offset..(offset + SIZEOF_EXTENDED_INODE)])
       end
-      valid_inode? || return
+      valid? || return
       rewind
-      @disk_buffer      = buffer
-      @mode             = @in['file_mode']
-      @flags            = @in['flags']
-      @version          = @in['version']
-      @length           = @in['size']
-      @format           = @in['format']
-      @block_offset     = 1
-      @data_method      = inode_format
+      @disk_buffer  = buffer
+      @mode         = @in['file_mode']
+      @flags        = @in['flags']
+      @version      = @in['version']
+      @length       = @in['size']
+      @format       = @in['format']
+      @block_offset = 1
+      @data_method  = inode_format
     end
 
     # ////////////////////////////////////////////////////////////////////////////
@@ -256,13 +258,13 @@ module XFS
              when IO::SEEK_CUR then @pos + offset
              when IO::SEEK_END then @length - offset
              end
-      @pos = 0           if @pos < 0
+      @pos = 0 if @pos < 0
       @pos = @length if @pos > @length
       @pos
     end
 
     def read(nbytes = @length)
-      raise "XFS::Inode.read: Can't read 4G or more at a time (use a smaller read size)" if nbytes >= MAX_READ
+      raise "VirtFS::XFS::Inode.read: Can't read 4G or more at a time (use a smaller read size)" if nbytes >= MAX_READ
       return nil if @pos >= @length
 
       nbytes = @length - @pos if @pos + nbytes > @length
@@ -276,7 +278,7 @@ module XFS
     end
 
     def write(buf, _len = buf.length)
-      raise "XFS::Inode.write: Write functionality is not yet supported on XFS."
+      raise "VirtFS::XFS::Inode.write: Write functionality is not yet supported on XFS."
     end
 
     # ////////////////////////////////////////////////////////////////////////////
@@ -371,10 +373,10 @@ module XFS
 
     def read_short_form(len)
       unless self.directory? || self.symlink?
-        raise "XFS::Inode.read: Invalid ShortForm Directory for inode #{@inode_number}"
+        raise "VirtFS::XFS::Inode.read: Invalid ShortForm Directory for inode #{@inode_number}"
       end
       if @pos + len > @sb.inode_size
-        raise "XFS::Inode.read_short_form: Invalid length #{len} for Shortform Inode #{@inode_number}"
+        raise "VirtFS::XFS::Inode.read_short_form: Invalid length #{len} for Shortform Inode #{@inode_number}"
       end
       fork = dfork_dptr
       data = fork[@pos..(@pos + len - 1)]
@@ -385,23 +387,25 @@ module XFS
     # NB: pos is 0-based, while len is 1-based
     def pos_to_block(pos, len)
       start_block, start_byte = pos.divmod(@sb.block_size)
-      end_block, _end_byte = (pos + len - 1).divmod(@sb.block_size)
-      nblocks = end_block - start_block + 1
+      end_block, _end_byte    = (pos + len - 1).divmod(@sb.block_size)
+      nblocks                 = end_block - start_block + 1
       return start_block, start_byte, nblocks
     end
 
     def read_blocks(startBlock, nblocks = 1)
-      out = MemoryBuffer.create(nblocks * @sb.block_size)
+      out     = MemoryBuffer.create(nblocks * @sb.block_size)
       dbp_len = data_block_pointers.length
-      raise "XFS::Inode.read_blocks: startBlock=<#{startBlock}> is greater than #{dbp_len}" if startBlock > dbp_len - 1
+      if startBlock > dbp_len - 1
+        raise "VirtFS::XFS::Inode.read_blocks: startBlock=<#{startBlock}> is greater than #{dbp_len}"
+      end
       1.upto(nblocks) do |i|
         block_index = startBlock + i - 1
-        dbp_len = data_block_pointers.length
+        dbp_len     = data_block_pointers.length
         if block_index > dbp_len - 1
-          raise "XFS::Inode.read_blocks: block_index=<#{block_index}> is greater than #{dbp_len}"
+          raise "VirtFS::XFS::Inode.read_blocks: block_index=<#{block_index}> is greater than #{dbp_len}"
         end
-        block = data_block_pointers[block_index]
-        data  = @sb.get_block(block)
+        block                                         = data_block_pointers[block_index]
+        data                                          = @sb.block(block)
         out[(i - 1) * @sb.block_size, @sb.block_size] = data
       end
       out
@@ -439,8 +443,7 @@ module XFS
         agbno      = @sb.fsb_to_agbno(block)
         agno       = @sb.fsb_to_agno(block)
         real_block = sb.agbno_to_real_block(agno, agbno)
-        block_pointers.concat block_pointers_via_bmap_btree_block(real_block,
-                                                                  block_pointers.length + block_pointers_length)
+        block_pointers.concat block_pointers_via_bmap_btree_block(real_block, block_pointers.length + block_pointers_length)
       end
       block_pointers
     end
@@ -449,8 +452,7 @@ module XFS
       block_pointers = []
       return block_pointers unless (block_pointers_length + block_pointers.length) < expected_blocks
       1.upto(number_records) do |i|
-        bmap_btree_record = BmapBTreeRecord.new(data[(SIZEOF_BMAP_BTREE_REC * (i - 1))..(SIZEOF_BMAP_BTREE_REC * i)],
-                                                @sb)
+        bmap_btree_record = BmapBTreeRecord.new(data[(SIZEOF_BMAP_BTREE_REC * (i - 1))..(SIZEOF_BMAP_BTREE_REC * i)], @sb)
         break if @sb.fsb_to_b(bmap_btree_record.start_offset) >= DirectoryEntry::XFS_DIR2_LEAF_OFFSET
         if (block_pointers_length + block_pointers.length) < expected_blocks
           block_pointers.concat bmap_btree_record_to_block_pointers(bmap_btree_record,
@@ -463,8 +465,8 @@ module XFS
     def block_pointers_via_bmap_btree_block(block_number, block_pointers_length)
       block_pointers = []
       if block_pointers_length < expected_blocks
-        data           = @sb.get_block(block_number)
-        btree_block    = BmapBTreeBlock.new(data, @sb)
+        data        = @sb.block(block_number)
+        btree_block = BmapBTreeBlock.new(data, @sb)
         if btree_block.level == 0
           block_pointers.concat block_pointers_via_bmap_btree_block_leaf(data[btree_block.header_size..-1],
                                                                          block_pointers.length + block_pointers_length,
@@ -479,8 +481,8 @@ module XFS
 
     def block_pointers_via_btree
       block_pointers = []
-      fork = dfork_dptr
-      root_node = BmapBTreeRootNode.new(fork, self)
+      fork           = dfork_dptr
+      root_node      = BmapBTreeRootNode.new(fork, self)
       root_node.blocks.each do |block_number|
         block_pointers.concat block_pointers_via_bmap_btree_block(block_number, block_pointers.length)
       end
@@ -498,12 +500,11 @@ module XFS
 
     def block_pointers_via_extents
       block_pointers = []
-      fork = dfork_dptr
-      extent_count = @in['num_extents']
+      fork           = dfork_dptr
+      extent_count   = @in['num_extents']
       return block_pointers if extent_count == 0
       1.upto(extent_count) do |i|
-        bmap_btree_record = BmapBTreeRecord.new(fork[(SIZEOF_BMAP_BTREE_REC * (i - 1))..(SIZEOF_BMAP_BTREE_REC * i)],
-                                                @sb)
+        bmap_btree_record = BmapBTreeRecord.new(fork[(SIZEOF_BMAP_BTREE_REC * (i - 1))..(SIZEOF_BMAP_BTREE_REC * i)], @sb)
         #
         # The following test is to weed out Leaf Metadata Blocks that have no directory content
         #
@@ -514,19 +515,19 @@ module XFS
     end
 
     def read_block_pointers(block)
-      @sb.get_block(block).unpack('L*')
+      @sb.block(block).unpack('L*')
     end
 
     def data_block_pointers
       if @data_block_pointers.nil?
-        @data_block_pointers = block_pointers_via_extents          if @data_method == :extents
-        @data_block_pointers = block_pointers_via_btree            if @data_method == :btree
-        dbp_len = @data_block_pointers.length
+        @data_block_pointers = block_pointers_via_extents if @data_method == :extents
+        @data_block_pointers = block_pointers_via_btree   if @data_method == :btree
+        dbp_len              = @data_block_pointers.length
         if expected_blocks != dbp_len
-          raise "XFS::Inode.block_pointers: Block Pointers <#{dbp_len}> does not match Expected <#{expected_blocks}>"
+          raise "VirtFS::XFS::Inode.block_pointers: Block Pointers <#{dbp_len}> does not match Expected <#{expected_blocks}>"
         end
       end
       @data_block_pointers
     end
   end # Class Inode
-end # Module XFS
+end # Module Virtfs::XFS

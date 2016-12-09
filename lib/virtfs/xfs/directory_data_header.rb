@@ -1,9 +1,9 @@
-require 'fs/xfs/directory'
-require 'fs/xfs/directory2_data_header'
-require 'fs/xfs/directory3_data_header'
-require 'fs/xfs/superblock'
+require_relative 'directory'
+require_relative 'directory2_data_header'
+require_relative 'directory3_data_header'
+require_relative 'superblock'
 
-module XFS
+module Virtfs::XFS
   DIRECTORY_DATA_FREE = BinaryStruct.new([
     'S>',  'offset',              # start of freespace
     'S>',  'length',              # length of freespace
@@ -19,7 +19,7 @@ module XFS
       template     = header.template
       @data_header = template.decode(data)
       header.magic_numbers.each { |magic_number| return template.size if @data_header['magic'] == magic_number }
-      raise "XFS::DirectoryDataHeader: Invalid Magic Number #{@data_header['magic']}"
+      raise "VirtFS::XFS::DirectoryDataHeader: Invalid Magic Number #{@data_header['magic']}"
     end
 
     def initialize(data, sb)
@@ -43,4 +43,4 @@ module XFS
       @header_end += version_header.pad
     end
   end # class DirectoryDataHeader
-end   # module XFS
+end   # module Virtfs::XFS

@@ -1,11 +1,11 @@
-require 'fs/xfs/inode'
-require 'fs/xfs/directory_entry'
-require 'fs/xfs/directory_block_tail'
-require 'fs/xfs/directory_data_header'
-require 'fs/xfs/short_form_header'
-require 'fs/xfs/short_form_directory_entry'
+require_relative 'inode'
+require_relative 'directory_entry'
+require_relative 'directory_block_tail'
+require_relative 'directory_data_header'
+require_relative 'short_form_header'
+require_relative 'short_form_directory_entry'
 
-module XFS
+module VirtFS::XFS
   DIRECTORY_LEAF_ENTRY = BinaryStruct.new([
     'I>', 'hashval',               # hash value of name
     'I>', 'address',               # address of data entry
@@ -20,11 +20,11 @@ module XFS
     attr_reader :inode_number, :inode_object
 
     def initialize(sb, inode_number = ROOT_DIRECTORY)
-      raise "XFS::Directory: Nil superblock"   if sb.nil?
+      raise "VirtFS::XFS::Directory: Nil superblock"   if sb.nil?
       @sb           = sb
       @inode_number = inode_number
-      @inode_object = sb.get_inode(inode_number)
-      raise "XFS::Directory: INODE=#{inode_number} is NOT a DIRECTORY" unless @inode_object.directory?
+      @inode_object = sb.inode(inode_number)
+      raise "VirtFS::XFS::Directory: INODE=#{inode_number} is NOT a DIRECTORY" unless @inode_object.directory?
       @data         = @inode_object.read
     end
 
@@ -36,7 +36,7 @@ module XFS
       return nil unless glob_entries.key?(name)
 
       glob_entries[name].each do |entry|
-        @inode_object    = @sb.get_inode(entry.inode)
+        @inode_object    = @sb.inode(entry.inode)
         entry.file_type = @inode_object.file_mode_to_file_type
         return entry if (entry.file_type == type) || type.nil?
       end
@@ -129,5 +129,5 @@ module XFS
       end
       {}
     end
-  end # class
-end # module
+  end # class Directory
+end # module VirtFS::XFS  

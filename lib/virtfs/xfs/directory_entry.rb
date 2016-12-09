@@ -1,6 +1,6 @@
 require 'binary_struct'
 
-module XFS
+module Virtfs::XFS
   # ////////////////////////////////////////////////////////////////////////////
   # // Data definitions.
   #
@@ -71,7 +71,7 @@ module XFS
     attr_accessor :file_type
 
     def initialize(data, version_3_header)
-      raise "XFS::DirectoryEntry.initialize: Nil directory entry data" if data.nil?
+      raise "VirtFS::XFS::DirectoryEntry.initialize: Nil directory entry data" if data.nil?
       size           = SIZEOF_DIRECTORY2_UNUSED_ENTRY
       start          = @length = @name_length = 0
       unused_entry   = DIRECTORY2_UNUSED_ENTRY.decode(data[start..size])
@@ -92,7 +92,7 @@ module XFS
         @tag      = DIRECTORY2_DATA_TAG.decode(data[start])
         @length   = free_size + dir_data_entsize(@name_length, version_3_header)
       end
-      raise "XFS::Directory: DirectoryEntry length cannot be 0" if @length == 0
+      raise "VirtFS::XFS::Directory: DirectoryEntry length cannot be 0" if @length == 0
     end
 
     def dump
@@ -103,4 +103,4 @@ module XFS
       out
     end
   end # class
-end # module
+end # module Virtfs::XFS
