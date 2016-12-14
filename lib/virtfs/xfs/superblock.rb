@@ -4,9 +4,6 @@ require 'binary_struct'
 require 'virt_disk/disk_uuid'
 require 'stringio'
 require 'memory_buffer'
-require_relative 'allocation_group'
-require_relative 'inode_map'
-require_relative 'inode'
 
 require 'rufus/lru'
 

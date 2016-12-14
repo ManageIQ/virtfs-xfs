@@ -1,8 +1,3 @@
-require_relative 'directory'
-require_relative 'directory2_data_header'
-require_relative 'directory3_data_header'
-require_relative 'superblock'
-
 module Virtfs::XFS
   DIRECTORY_DATA_FREE = BinaryStruct.new([
     'S>',  'offset',              # start of freespace

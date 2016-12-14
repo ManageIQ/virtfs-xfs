@@ -1,5 +1,3 @@
-require_relative 'inode'
-
 module VirtFS::XFS
   BMAP_BTREE_ROOT_NODE_HEADER = BinaryStruct.new([
     'S>',          'level',           # B+Tree Level

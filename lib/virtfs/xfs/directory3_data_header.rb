@@ -1,6 +1,3 @@
-require_relative 'directory'
-require_relative 'superblock'
-
 module Virtfs::XFS
   DIRECTORY3_DATA_HEADER = BinaryStruct.new([
     'I>',  'magic',               # magic number

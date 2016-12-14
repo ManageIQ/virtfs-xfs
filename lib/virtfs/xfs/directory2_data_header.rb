@@ -1,6 +1,3 @@
-require_relative 'directory'
-require_relative 'superblock'
-
 module Virtfs::XFS
   #
   # xfs_dir2_data_hdr consists of the magic number

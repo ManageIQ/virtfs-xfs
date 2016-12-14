@@ -1,10 +1,6 @@
 require 'binary_struct'
 require 'memory_buffer'
 require 'more_core_extensions/all'
-require_relative 'superblock'
-require_relative 'bmap_btree_record'
-require_relative 'bmap_btree_block'
-require_relative 'bmap_btree_root_node'
 
 module Virtfs::XFS
   TIMESTAMP = BinaryStruct.new([

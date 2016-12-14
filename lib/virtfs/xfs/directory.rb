@@ -1,10 +1,3 @@
-require_relative 'inode'
-require_relative 'directory_entry'
-require_relative 'directory_block_tail'
-require_relative 'directory_data_header'
-require_relative 'short_form_header'
-require_relative 'short_form_directory_entry'
-
 module VirtFS::XFS
   DIRECTORY_LEAF_ENTRY = BinaryStruct.new([
     'I>', 'hashval',               # hash value of name
