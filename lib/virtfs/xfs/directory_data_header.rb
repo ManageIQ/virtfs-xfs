@@ -1,11 +1,11 @@
 module Virtfs::XFS
-  DIRECTORY_DATA_FREE = BinaryStruct.new([
-    'S>',  'offset',              # start of freespace
-    'S>',  'length',              # length of freespace
-  ])
-  SIZEOF_DIRECTORY_DATA_FREE    = DIRECTORY_DATA_FREE.size
-
   class DirectoryDataHeader
+    DIRECTORY_DATA_FREE = BinaryStruct.new([
+      'S>',  'offset',              # start of freespace
+      'S>',  'length',              # length of freespace
+    ])
+    SIZEOF_DIRECTORY_DATA_FREE    = DIRECTORY_DATA_FREE.size
+
     XFS_DIR2_DATA_FD_COUNT      = 3
 
     attr_reader :data_header, :header_end, :version_3

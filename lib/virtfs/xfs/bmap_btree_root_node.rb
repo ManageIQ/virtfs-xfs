@@ -1,35 +1,35 @@
 module VirtFS::XFS
-  BMAP_BTREE_ROOT_NODE_HEADER = BinaryStruct.new([
-    'S>',          'level',           # B+Tree Level
-    'S>',          'entry_count',     # Number of Key and Pointer Array Elements
-  ])
-
-  SIZEOF_BMAP_BTREE_ROOT_NODE_HEADER  = BMAP_BTREE_ROOT_NODE_HEADER.size
-
-  #
-  # Note that the following 3 entries are used simply to compute the maximum
-  # number of records possible in the on-disk inode.
-  #
-  BMAP_BTREE_ROOT_NODE_ENTRIES = BinaryStruct.new([
-    'Q>',          'starting_offset', # starting offset of the block
-    'Q>',          'block_number',    # block number of the entry
-  ])
-  SIZEOF_BMAP_BTREE_ROOT_NODE_ENTRIES   = BMAP_BTREE_ROOT_NODE_ENTRIES.size
-
-  BMAP_BTREE_ROOT_NODE_OFFSET = BinaryStruct.new([
-    'Q>',          'starting_offset',  # starting offset of the block
-  ])
-  SIZEOF_BMAP_BTREE_ROOT_NODE_OFFSET   = BMAP_BTREE_ROOT_NODE_OFFSET.size
-
-  BMAP_BTREE_ROOT_NODE_BLOCK = BinaryStruct.new([
-    'Q>',          'block_number',     # block number of the entry
-  ])
-  SIZEOF_BMAP_BTREE_ROOT_NODE_BLOCK    = BMAP_BTREE_ROOT_NODE_BLOCK.size
-
   #
   # Handle the BTree Root Node in the Disk Inode
   #
   class BmapBTreeRootNode
+    BMAP_BTREE_ROOT_NODE_HEADER = BinaryStruct.new([
+      'S>',          'level',           # B+Tree Level
+      'S>',          'entry_count',     # Number of Key and Pointer Array Elements
+    ])
+
+    SIZEOF_BMAP_BTREE_ROOT_NODE_HEADER  = BMAP_BTREE_ROOT_NODE_HEADER.size
+
+    #
+    # Note that the following 3 entries are used simply to compute the maximum
+    # number of records possible in the on-disk inode.
+    #
+    BMAP_BTREE_ROOT_NODE_ENTRIES = BinaryStruct.new([
+      'Q>',          'starting_offset', # starting offset of the block
+      'Q>',          'block_number',    # block number of the entry
+    ])
+    SIZEOF_BMAP_BTREE_ROOT_NODE_ENTRIES   = BMAP_BTREE_ROOT_NODE_ENTRIES.size
+
+    BMAP_BTREE_ROOT_NODE_OFFSET = BinaryStruct.new([
+      'Q>',          'starting_offset',  # starting offset of the block
+    ])
+    SIZEOF_BMAP_BTREE_ROOT_NODE_OFFSET   = BMAP_BTREE_ROOT_NODE_OFFSET.size
+
+    BMAP_BTREE_ROOT_NODE_BLOCK = BinaryStruct.new([
+      'Q>',          'block_number',     # block number of the entry
+    ])
+    SIZEOF_BMAP_BTREE_ROOT_NODE_BLOCK    = BMAP_BTREE_ROOT_NODE_BLOCK.size
+
     attr_accessor   :level, :entry_count, :blocks
 
     def initialize(data, inode)

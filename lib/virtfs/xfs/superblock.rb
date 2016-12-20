@@ -9,72 +9,72 @@ require 'rufus/lru'
 
 module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
-  # // Data definitions. Linux 2.6.2 from Fedora Core 6.
-
-  SUPERBLOCK = BinaryStruct.new([
-    'L>',  'magic_num',          # magic number of the filesystem
-    'L>',  'block_size',         # size of a basic unit of space allocation in bytes
-    'Q>',  'data_blocks',        # total Number of blocks available for data and metadata
-    'Q>',  'realtime_blocks',    # number of blocks on the real-time disk device
-    'Q>',  'realtime_extents',   # Number of extents on the real-time disk device
-    'a16',  'uuid',              # UUID for the filesystem
-    'Q>',  'log_start',          # first block for the journal log if internal (0 if external)
-    'Q>',  'root_inode_num',     # root inode number for the filesystem
-    'Q>',  'bitmap_inode_num',   # bitmap inode number for real-time extents
-    'Q>',  'summary_inode_num',  # summary inode number for real-time bitmap
-    'L>',  'realtime_ext_size',  # real-time extent size in blocks
-    'L>',  'ag_blocks',          # size of each allocation group in blocks
-    'L>',  'ag_count',           # number of allocation groups in the filesystem
-    'L>',  'bitmap_blocks',      # number of real-time bitmap blocks
-    'L>',  'log_blocks',         # number of blocks for the journaling log
-    'S>',  'version_number',     # Filesystem version number
-    'S>',  'sector_size',        # underlying disk sector size in bytes
-    'S>',  'inode_size',         # size of the inode in bytes
-    'S>',  'inodes_per_blk',     # number of inodes per block
-    'a12',  'fs_name',           # name for the filesystem
-    'C',   'block_size_log',     # log base 2 of block_size
-    'C',   'sector_size_log',    # log base 2 of sector_size
-    'C',   'inode_size_log',     # log base 2 of inode_size
-    'C',   'inodes_per_blk_log', # log base 2 of inodes_per_blk
-    'C',   'ag_blocks_log',      # log base 2 of ag_blocks (rounded up)
-    'C',   'rt_ext_size_log',    # log base 2 of realtime_ext_size
-    'C',   'in_progress',        # flag specifying that the filesystem is being created
-    'C',   'inode_max_pct',      # maximum percentage of filesystem space that can be used for inodes
-    'Q>',  'inode_count',        # global count for number of inodes allocated on the filesystem
-    'Q>',  'inode_free_count',   # global count of free inodes on the filesystem.
-    'Q>',  'free_data_blocks',   # global count of free data blocks on the filesystem
-    'Q>',  'free_rt_extents',    # global count of free real-time extents on the filesystem
-    'Q>',  'user_quota_ino',     # inode number for user quotas
-    'Q>',  'group_quota_ino',    # inode number for group quotas
-    'S>',  'quota_flags',        # quota flags
-    'C',   'misc_flags',         # miscellaneous flags
-    'C',   'shared_vers_no',     # shared version number
-    'L>',  'inode_alignment',    # inode chunk alignment in blocks
-    'L>',  'stripe_unit',        # underlying stripe or raid unit in blocks
-    'L>',  'stripe_width',       # underlying stripe or raid width in blocks
-    'C',   'dir_block_log',      # log base 2 multiplier that determines the
-    # granularity of directory block allocations in fsblocks
-    'C',   'log_sect_size_log',  # log base 2 of the log subvolume's sector size
-    'S>',  'log_sector_size',    # the log's sector size in bytes if the filesystem uses an external log device
-    'L>',  'log_stripe_unit_sz', # the log device's stripe or raid unit size.
-    'L>',  'features_2',         # add'l version flags if XFS_SUPERBLOCK_VERSION_MOREBITSBIT is set in version_number
-    # version 5 superblock fields start here
-    'L>',  'features_compat',
-    'L>',  'features_ro_compat',
-    'L>',  'features_incompat',
-    'L>',  'features_log_incompat',
-    'L>',  'superblock_crc',     # superblock crc
-    'L>',  'padding',
-    'Q>',  'proj_quota_ino',     # inode number for project quotas
-    'q>',  'last_write_seq',     # last write sequence
-  ])
-
-  SUPERBLOCK_SIZE = 512
-
-  # ////////////////////////////////////////////////////////////////////////////
   # // Class.
 
   class Superblock
+    # ////////////////////////////////////////////////////////////////////////////
+    # // Data definitions. Linux 2.6.2 from Fedora Core 6.
+
+    SUPERBLOCK = BinaryStruct.new([
+      'L>',  'magic_num',          # magic number of the filesystem
+      'L>',  'block_size',         # size of a basic unit of space allocation in bytes
+      'Q>',  'data_blocks',        # total Number of blocks available for data and metadata
+      'Q>',  'realtime_blocks',    # number of blocks on the real-time disk device
+      'Q>',  'realtime_extents',   # Number of extents on the real-time disk device
+      'a16',  'uuid',              # UUID for the filesystem
+      'Q>',  'log_start',          # first block for the journal log if internal (0 if external)
+      'Q>',  'root_inode_num',     # root inode number for the filesystem
+      'Q>',  'bitmap_inode_num',   # bitmap inode number for real-time extents
+      'Q>',  'summary_inode_num',  # summary inode number for real-time bitmap
+      'L>',  'realtime_ext_size',  # real-time extent size in blocks
+      'L>',  'ag_blocks',          # size of each allocation group in blocks
+      'L>',  'ag_count',           # number of allocation groups in the filesystem
+      'L>',  'bitmap_blocks',      # number of real-time bitmap blocks
+      'L>',  'log_blocks',         # number of blocks for the journaling log
+      'S>',  'version_number',     # Filesystem version number
+      'S>',  'sector_size',        # underlying disk sector size in bytes
+      'S>',  'inode_size',         # size of the inode in bytes
+      'S>',  'inodes_per_blk',     # number of inodes per block
+      'a12',  'fs_name',           # name for the filesystem
+      'C',   'block_size_log',     # log base 2 of block_size
+      'C',   'sector_size_log',    # log base 2 of sector_size
+      'C',   'inode_size_log',     # log base 2 of inode_size
+      'C',   'inodes_per_blk_log', # log base 2 of inodes_per_blk
+      'C',   'ag_blocks_log',      # log base 2 of ag_blocks (rounded up)
+      'C',   'rt_ext_size_log',    # log base 2 of realtime_ext_size
+      'C',   'in_progress',        # flag specifying that the filesystem is being created
+      'C',   'inode_max_pct',      # maximum percentage of filesystem space that can be used for inodes
+      'Q>',  'inode_count',        # global count for number of inodes allocated on the filesystem
+      'Q>',  'inode_free_count',   # global count of free inodes on the filesystem.
+      'Q>',  'free_data_blocks',   # global count of free data blocks on the filesystem
+      'Q>',  'free_rt_extents',    # global count of free real-time extents on the filesystem
+      'Q>',  'user_quota_ino',     # inode number for user quotas
+      'Q>',  'group_quota_ino',    # inode number for group quotas
+      'S>',  'quota_flags',        # quota flags
+      'C',   'misc_flags',         # miscellaneous flags
+      'C',   'shared_vers_no',     # shared version number
+      'L>',  'inode_alignment',    # inode chunk alignment in blocks
+      'L>',  'stripe_unit',        # underlying stripe or raid unit in blocks
+      'L>',  'stripe_width',       # underlying stripe or raid width in blocks
+      'C',   'dir_block_log',      # log base 2 multiplier that determines the
+      # granularity of directory block allocations in fsblocks
+      'C',   'log_sect_size_log',  # log base 2 of the log subvolume's sector size
+      'S>',  'log_sector_size',    # the log's sector size in bytes if the filesystem uses an external log device
+      'L>',  'log_stripe_unit_sz', # the log device's stripe or raid unit size.
+      'L>',  'features_2',         # add'l version flags if XFS_SUPERBLOCK_VERSION_MOREBITSBIT is set in version_number
+      # version 5 superblock fields start here
+      'L>',  'features_compat',
+      'L>',  'features_ro_compat',
+      'L>',  'features_incompat',
+      'L>',  'features_log_incompat',
+      'L>',  'superblock_crc',     # superblock crc
+      'L>',  'padding',
+      'Q>',  'proj_quota_ino',     # inode number for project quotas
+      'q>',  'last_write_seq',     # last write sequence
+    ])
+
+    SUPERBLOCK_SIZE = 512
+
     #
     # Block I/O parameterization. A basic block (BB) is the lowest size of
     # filesystem allocation, and must equal 512.  Length units given to bio

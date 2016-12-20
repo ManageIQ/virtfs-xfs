@@ -1,33 +1,33 @@
 require 'binary_struct'
 
 module Virtfs::XFS
-  # ////////////////////////////////////////////////////////////////////////////
-  # // Data definitions.
-  #
-  # Active entry in a data block.
-  # Aligned to 8 bytes.  A variable length name field follows the length.
-  # After the name there is a 2 byte tag field.
-  # For dir3 structures, there is a 1 byte file type field between the name
-  # and the tag.  It is packed hard against the end of the name so any padding
-  # for rounding is between the file type and the tag.
-  DIRECTORY2_DATA_ENTRY = BinaryStruct.new([
-    'Q>',  'inumber',   # inode number
-    'C',   'name_len',  # name length
-  ])
-  SIZEOF_DIRECTORY2_DATA_ENTRY = DIRECTORY2_DATA_ENTRY.size
-
-  DIRECTORY2_DATA_TAG = BinaryStruct.new([
-    'S>',  'tag',       # tag
-  ])
-  SIZEOF_DIRECTORY2_DATA_TAG = DIRECTORY2_DATA_TAG.size
-
-  DIRECTORY2_UNUSED_ENTRY = BinaryStruct.new([
-    'S>',  'freetag',   # 0xFFFF if unused
-    'S>',  'length',    # length of this free entry
-  ])
-  SIZEOF_DIRECTORY2_UNUSED_ENTRY = DIRECTORY2_UNUSED_ENTRY.size
-
   class DirectoryEntry
+    # ////////////////////////////////////////////////////////////////////////////
+    # // Data definitions.
+    #
+    # Active entry in a data block.
+    # Aligned to 8 bytes.  A variable length name field follows the length.
+    # After the name there is a 2 byte tag field.
+    # For dir3 structures, there is a 1 byte file type field between the name
+    # and the tag.  It is packed hard against the end of the name so any padding
+    # for rounding is between the file type and the tag.
+    DIRECTORY2_DATA_ENTRY = BinaryStruct.new([
+      'Q>',  'inumber',   # inode number
+      'C',   'name_len',  # name length
+    ])
+    SIZEOF_DIRECTORY2_DATA_ENTRY = DIRECTORY2_DATA_ENTRY.size
+
+    DIRECTORY2_DATA_TAG = BinaryStruct.new([
+      'S>',  'tag',       # tag
+    ])
+    SIZEOF_DIRECTORY2_DATA_TAG = DIRECTORY2_DATA_TAG.size
+
+    DIRECTORY2_UNUSED_ENTRY = BinaryStruct.new([
+      'S>',  'freetag',   # 0xFFFF if unused
+      'S>',  'length',    # length of this free entry
+    ])
+    SIZEOF_DIRECTORY2_UNUSED_ENTRY = DIRECTORY2_UNUSED_ENTRY.size
+
     XFS_DIR2_DATA_FREE_TAG          = 0xffff
     XFS_DIR2_DATA_ALIGN_LOG         = 3
     XFS_DIR2_DATA_ALIGN             = 1 << XFS_DIR2_DATA_ALIGN_LOG

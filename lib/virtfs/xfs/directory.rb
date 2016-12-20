@@ -1,11 +1,11 @@
 module VirtFS::XFS
-  DIRECTORY_LEAF_ENTRY = BinaryStruct.new([
-    'I>', 'hashval',               # hash value of name
-    'I>', 'address',               # address of data entry
-  ])
-  SIZEOF_DIRECTORY_LEAF_ENTRY = DIRECTORY_LEAF_ENTRY.size
-
   class Directory
+    DIRECTORY_LEAF_ENTRY = BinaryStruct.new([
+      'I>', 'hashval',               # hash value of name
+      'I>', 'address',               # address of data entry
+    ])
+    SIZEOF_DIRECTORY_LEAF_ENTRY = DIRECTORY_LEAF_ENTRY.size
+
     DOT                     = 1
     DOTDOT                  = 2
     ROOT_DIRECTORY          = 128

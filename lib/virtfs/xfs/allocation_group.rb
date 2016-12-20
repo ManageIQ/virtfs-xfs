@@ -7,88 +7,86 @@ require 'rufus/lru'
 
 module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
-
-  AG_FREESPACE = BinaryStruct.new([
-    #  Common allocation group header information
-    'I>',  'magic_num',          # magic number of the filesystem
-    'I>',  'version_num',        # header version
-    'I>',  'seq_no',             # sequence # starting from 0
-    'I>',  'length',             # size in blocks of a.g.
-    #  Freespace Information
-    #
-    'I>2', 'root_blocks',        # Root Blocks
-    'I>',  'spare0',             # spare field
-    'I>2', 'btree_levels',       # btree levels
-    'I>',  'spare1',             # spare field
-    'I>',  'fl_first',           # first freelist block's index
-    'I>',  'fl_last',            # last freelist block's index
-    'I>',  'fl_count',           # count of blocks in freelist
-    'I>',  'free_blocks',        # total free blocks
-    'L>',  'longest',            # longest free space
-    'L>',  'btree_blocks',       # # of blocks held in alloc group free btrees
-    'a16', 'uuid',               # Filesystem uuid
-    #
-    # Reserve some contiguous space for future logged fields before we add
-    # the unlogged fields.  This makes the range logging via flags and
-    # structure offsets much simpler.
-    #
-    'Q>16', 'spare64',           # underlying disk sector size in bytes
-    #
-    # Unlogged fields, written during buffer writeback.
-    #
-    'Q>',  'last_write_seq',     # last write sequence
-    'I>',  'crc',                # CRC of alloc group free space sector
-    'I>',  'spare2',             # name for the filesystem
-  ])
-
-  AG_INODEINFO = BinaryStruct.new([
-    #  Common allocation group header information
-    'I>',  'magic_num',          # magic number of the filesystem
-    'I>',  'version_num',        # header version
-    'I>',  'seq_no',             # sequence # starting from 0
-    'I>',  'length',             # size in blocks of a.g.
-    #
-    #  Inode information
-    #  Inodes are mapped by interpretting the inode number, so no
-    #  mapping data is needed here.
-    #
-    'I>',  'count',              # count of allocated inodes
-    'I>',  'root',               # root of inode btree
-    'I>',  'level',              # levels in inode btree
-    'I>',  'free_count',         # number of free inodes
-    'I>',  'new_inode',          # new inode just allocated
-    'I>',  'dir_inode',          # last directory inode chunk
-    #
-    # Hash table of inodes which have been unlinked but are
-    # still being referenced.
-    #
-    'I>64', 'unlinked_hash',     # the hash
-    'a16', 'uuid',               # Filesystem uuid
-    'I>',  'crc',                # CRC of alloc group inode info sector
-    'I>',  'pad32',              #
-    'Q>',  'last_write_seq',     # last write sequence
-    'I>',  'free_root',          # root of the free inode btree
-    'I>',  'free_level',         # levels in free inode btree
-  ])
-
-  #
-  # The third AG block contains the AG FreeList, an array
-  # of block pointers to blocks owned by the allocation btree code.
-  #
-  AG_FREELIST = BinaryStruct.new([
-    'I>',  'magic_num',          # magic number of the filesystem
-    'I>',  'seq_no',             # sequence # starting from 0
-    'a16', 'uuid',               # Filesystem uuid
-    'Q>',  'last_write_seq',     # last write sequence
-    'I>',  'crc',                # CRC of alloc group inode info sector
-    'I>',  'bno',                # actually XFS_AGFL_SIZE
-  ])
-  AG_FL_STRUCT_SIZE = AG_FREELIST.size
-
-  # ////////////////////////////////////////////////////////////////////////////
   # // Class.
-
+ 
   class AllocationGroup
+    AG_FREESPACE = BinaryStruct.new([
+      #  Common allocation group header information
+      'I>',  'magic_num',          # magic number of the filesystem
+      'I>',  'version_num',        # header version
+      'I>',  'seq_no',             # sequence # starting from 0
+      'I>',  'length',             # size in blocks of a.g.
+      #  Freespace Information
+      #
+      'I>2', 'root_blocks',        # Root Blocks
+      'I>',  'spare0',             # spare field
+      'I>2', 'btree_levels',       # btree levels
+      'I>',  'spare1',             # spare field
+      'I>',  'fl_first',           # first freelist block's index
+      'I>',  'fl_last',            # last freelist block's index
+      'I>',  'fl_count',           # count of blocks in freelist
+      'I>',  'free_blocks',        # total free blocks
+      'L>',  'longest',            # longest free space
+      'L>',  'btree_blocks',       # # of blocks held in alloc group free btrees
+      'a16', 'uuid',               # Filesystem uuid
+      #
+      # Reserve some contiguous space for future logged fields before we add
+      # the unlogged fields.  This makes the range logging via flags and
+      # structure offsets much simpler.
+      #
+      'Q>16', 'spare64',           # underlying disk sector size in bytes
+      #
+      # Unlogged fields, written during buffer writeback.
+      #
+      'Q>',  'last_write_seq',     # last write sequence
+      'I>',  'crc',                # CRC of alloc group free space sector
+      'I>',  'spare2',             # name for the filesystem
+    ])
+
+    AG_INODEINFO = BinaryStruct.new([
+      #  Common allocation group header information
+      'I>',  'magic_num',          # magic number of the filesystem
+      'I>',  'version_num',        # header version
+      'I>',  'seq_no',             # sequence # starting from 0
+      'I>',  'length',             # size in blocks of a.g.
+      #
+      #  Inode information
+      #  Inodes are mapped by interpretting the inode number, so no
+      #  mapping data is needed here.
+      #
+      'I>',  'count',              # count of allocated inodes
+      'I>',  'root',               # root of inode btree
+      'I>',  'level',              # levels in inode btree
+      'I>',  'free_count',         # number of free inodes
+      'I>',  'new_inode',          # new inode just allocated
+      'I>',  'dir_inode',          # last directory inode chunk
+      #
+      # Hash table of inodes which have been unlinked but are
+      # still being referenced.
+      #
+      'I>64', 'unlinked_hash',     # the hash
+      'a16', 'uuid',               # Filesystem uuid
+      'I>',  'crc',                # CRC of alloc group inode info sector
+      'I>',  'pad32',              #
+      'Q>',  'last_write_seq',     # last write sequence
+      'I>',  'free_root',          # root of the free inode btree
+      'I>',  'free_level',         # levels in free inode btree
+    ])
+
+    #
+    # The third AG block contains the AG FreeList, an array
+    # of block pointers to blocks owned by the allocation btree code.
+    #
+    AG_FREELIST = BinaryStruct.new([
+      'I>',  'magic_num',          # magic number of the filesystem
+      'I>',  'seq_no',             # sequence # starting from 0
+      'a16', 'uuid',               # Filesystem uuid
+      'Q>',  'last_write_seq',     # last write sequence
+      'I>',  'crc',                # CRC of alloc group inode info sector
+      'I>',  'bno',                # actually XFS_AGFL_SIZE
+    ])
+    AG_FL_STRUCT_SIZE = AG_FREELIST.size
+
     AG_FREESPACE_SIZE = 512
     AG_INODEINFO_SIZE = 512
     AG_FREELIST_SIZE  = 512

@@ -6,74 +6,72 @@ require 'rufus/lru'
 
 module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
-
-  BTREE_BLOCK_SHORT_NOCRC = BinaryStruct.new([
-    #  Common BTree Block header information
-    'I>',  'magic_num',          # magic number of the btree block type
-    'S>',  'level',              # level number.  0 is a leaf
-    'S>',  'num_recs',           # current # of data records
-    #
-    #  Short Section
-    #
-    'I>',  'left_sibling',       #
-    'I>',  'right_sibling',      #
-  ])
-  SIZEOF_BTREE_BLOCK_SHORT_NOCRC = BTREE_BLOCK_SHORT_NOCRC.size
-
-  BTREE_BLOCK_SHORT = BinaryStruct.new([
-    #  Common BTree Block header information
-    'I>',  'magic_num',          # magic number of the btree block type
-    'S>',  'level',              # level number.  0 is a leaf
-    'S>',  'num_recs',           # current # of data records
-    #
-    #  Short Section
-    #
-    'I>',  'left_sibling',       #
-    'I>',  'right_sibling',      #
-    'Q>',  'block_num',          #
-    'Q>',  'lsn',                #
-    'a16', 'uuid',               #
-    'I>',  'owner',              #
-    'I>',  'crc',                #
-  ])
-  SIZEOF_BTREE_BLOCK_SHORT = BTREE_BLOCK_SHORT.size
-
-  BTREE_BLOCK_LONG_NOCRC = BinaryStruct.new([
-    #  Common BTree Block header information
-    'I>',  'magic_num',          # magic number of the btree block type
-    'S>',  'level',              # level number.  0 is a leaf
-    'S>',  'num_recs',           # current # of data records
-    #
-    #  Long Section
-    #
-    'Q>',  'left_sibling',       #
-    'Q>',  'right_sibling',      #
-  ])
-  SIZEOF_BTREE_BLOCK_LONG_NOCRC = BTREE_BLOCK_LONG_NOCRC.size
-
-  BTREE_BLOCK_LONG = BinaryStruct.new([
-    #  Common BTree Block header information
-    'I>',  'magic_num',          # magic number of the btree block type
-    'S>',  'level',              # level number.  0 is a leaf
-    'S>',  'num_recs',           # current # of data records
-    #
-    #  Long Section
-    #
-    'Q>',  'left_sibling',       #
-    'Q>',  'right_sibling',      #
-    'Q>',  'block_num',          #
-    'Q>',  'lsn',                #
-    'a16', 'uuid',               #
-    'Q>',  'owner',              #
-    'I>',  'crc',                #
-    'I>',  'pad',                #
-  ])
-  SIZEOF_BTREE_BLOCK_LONG = BTREE_BLOCK_LONG.size
-
-  # ////////////////////////////////////////////////////////////////////////////
   # // Class.
-
+ 
   class BmapBTreeBlock
+    BTREE_BLOCK_SHORT_NOCRC = BinaryStruct.new([
+      #  Common BTree Block header information
+      'I>',  'magic_num',          # magic number of the btree block type
+      'S>',  'level',              # level number.  0 is a leaf
+      'S>',  'num_recs',           # current # of data records
+      #
+      #  Short Section
+      #
+      'I>',  'left_sibling',       #
+      'I>',  'right_sibling',      #
+    ])
+    SIZEOF_BTREE_BLOCK_SHORT_NOCRC = BTREE_BLOCK_SHORT_NOCRC.size
+
+    BTREE_BLOCK_SHORT = BinaryStruct.new([
+      #  Common BTree Block header information
+      'I>',  'magic_num',          # magic number of the btree block type
+      'S>',  'level',              # level number.  0 is a leaf
+      'S>',  'num_recs',           # current # of data records
+      #
+      #  Short Section
+      #
+      'I>',  'left_sibling',       #
+      'I>',  'right_sibling',      #
+      'Q>',  'block_num',          #
+      'Q>',  'lsn',                #
+      'a16', 'uuid',               #
+      'I>',  'owner',              #
+      'I>',  'crc',                #
+    ])
+    SIZEOF_BTREE_BLOCK_SHORT = BTREE_BLOCK_SHORT.size
+
+    BTREE_BLOCK_LONG_NOCRC = BinaryStruct.new([
+      #  Common BTree Block header information
+      'I>',  'magic_num',          # magic number of the btree block type
+      'S>',  'level',              # level number.  0 is a leaf
+      'S>',  'num_recs',           # current # of data records
+      #
+      #  Long Section
+      #
+      'Q>',  'left_sibling',       #
+      'Q>',  'right_sibling',      #
+    ])
+    SIZEOF_BTREE_BLOCK_LONG_NOCRC = BTREE_BLOCK_LONG_NOCRC.size
+
+    BTREE_BLOCK_LONG = BinaryStruct.new([
+      #  Common BTree Block header information
+      'I>',  'magic_num',          # magic number of the btree block type
+      'S>',  'level',              # level number.  0 is a leaf
+      'S>',  'num_recs',           # current # of data records
+      #
+      #  Long Section
+      #
+      'Q>',  'left_sibling',       #
+      'Q>',  'right_sibling',      #
+      'Q>',  'block_num',          #
+      'Q>',  'lsn',                #
+      'a16', 'uuid',               #
+      'Q>',  'owner',              #
+      'I>',  'crc',                #
+      'I>',  'pad',                #
+    ])
+    SIZEOF_BTREE_BLOCK_LONG = BTREE_BLOCK_LONG.size
+
     XFS_BTREE_LONG_PTRS = 1
     XFS_BMAP_MAGIC      = 0x424d4150
     XFS_BMAP_CRC_MAGIC  = 0x424d4133

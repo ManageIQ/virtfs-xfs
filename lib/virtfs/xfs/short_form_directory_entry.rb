@@ -1,29 +1,29 @@
 require 'binary_struct'
 
 module Virtfs::XFS
-  # ////////////////////////////////////////////////////////////////////////////
-  # // Data definitions.
-  #
-  # Short Form Directory Entry in a Short Form Inode.
-  #
-  SHORT_FORM_DIRECTORY_ENTRY = BinaryStruct.new([
-    'C',   'name_length',  # name length
-    'C',   'offset_byte0',
-    'C',   'offset_byte1',
-  ])
-  SIZEOF_SHORT_FORM_DIRECTORY_ENTRY = SHORT_FORM_DIRECTORY_ENTRY.size
-
-  SHORT_FORM_SHORT_INO = BinaryStruct.new([
-    'I>',  'inode_num', # 4 byte inode number
-  ])
-  SIZEOF_SHORT_FORM_SHORT_INO = SHORT_FORM_SHORT_INO.size
-
-  SHORT_FORM_LONG_INO = BinaryStruct.new([
-    'Q>',  'inode_num', # 8 byte inode number
-  ])
-  SIZEOF_SHORT_FORM_LONG_INO = SHORT_FORM_LONG_INO.size
-
   class ShortFormDirectoryEntry
+    # ////////////////////////////////////////////////////////////////////////////
+    # // Data definitions.
+    #
+    # Short Form Directory Entry in a Short Form Inode.
+    #
+    SHORT_FORM_DIRECTORY_ENTRY = BinaryStruct.new([
+      'C',   'name_length',  # name length
+      'C',   'offset_byte0',
+      'C',   'offset_byte1',
+    ])
+    SIZEOF_SHORT_FORM_DIRECTORY_ENTRY = SHORT_FORM_DIRECTORY_ENTRY.size
+
+    SHORT_FORM_SHORT_INO = BinaryStruct.new([
+      'I>',  'inode_num', # 4 byte inode number
+    ])
+    SIZEOF_SHORT_FORM_SHORT_INO = SHORT_FORM_SHORT_INO.size
+
+    SHORT_FORM_LONG_INO = BinaryStruct.new([
+      'Q>',  'inode_num', # 8 byte inode number
+    ])
+    SIZEOF_SHORT_FORM_LONG_INO = SHORT_FORM_LONG_INO.size
+
     attr_reader :length, :name, :name_length, :short_inode
     attr_accessor :file_type, :inode
 

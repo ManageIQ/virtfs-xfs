@@ -1,20 +1,20 @@
 module Virtfs::XFS
-  DIRECTORY3_DATA_HEADER = BinaryStruct.new([
-    'I>',  'magic',               # magic number
-    'I>',  'crc',                 # CRC of block
-    'Q>',  'block_number',        # first block of the buffer
-    'Q>',  'last_write_sequence', # sequence number of last write
-    'a16', 'uuid',                # filesystem we belong to
-    'Q>',  'owner',               # inode that owns the block
-  ])
-  SIZEOF_DIRECTORY3_DATA_HEADER = DIRECTORY3_DATA_HEADER.size
-
-  DIRECTORY3_DATA_PAD = BinaryStruct.new([
-    'I>',  'padding',             # padding
-  ])
-  SIZEOF_DIRECTORY3_DATA_PAD = DIRECTORY3_DATA_PAD.size
-
   class Directory3DataHeader
+    DIRECTORY3_DATA_HEADER = BinaryStruct.new([
+      'I>',  'magic',               # magic number
+      'I>',  'crc',                 # CRC of block
+      'Q>',  'block_number',        # first block of the buffer
+      'Q>',  'last_write_sequence', # sequence number of last write
+      'a16', 'uuid',                # filesystem we belong to
+      'Q>',  'owner',               # inode that owns the block
+    ])
+    SIZEOF_DIRECTORY3_DATA_HEADER = DIRECTORY3_DATA_HEADER.size
+
+    DIRECTORY3_DATA_PAD = BinaryStruct.new([
+      'I>',  'padding',             # padding
+    ])
+    SIZEOF_DIRECTORY3_DATA_PAD = DIRECTORY3_DATA_PAD.size
+
     XFS_DIR3_BLOCK_MAGIC        = 0x58444233 # XDB3: single block dirs
     XFS_DIR3_DATA_MAGIC         = 0x58444433 # XDD3: multiblock dirs
 

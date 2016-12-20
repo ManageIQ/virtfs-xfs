@@ -3,93 +3,93 @@ require 'memory_buffer'
 require 'more_core_extensions/all'
 
 module Virtfs::XFS
-  TIMESTAMP = BinaryStruct.new([
-    'I',  'seconds',           # timestamp seconds
-    'I',  'nanoseconds',       # timestamp nanoseconds
-  ])
-
-  INODE = BinaryStruct.new([
-    'S>',  'magic',             # Inode Magic Number
-    'S>',  'file_mode',         # Mode and Type of file
-    'C',   'version',           # Inode Version
-    'C',   'format',            # Format of Data Fork Data
-    'S>',  'old_num_links',     # Old Number of Links to File
-    'I>',  'uid',               # Owner's User Id
-    'I>',  'gid',               # Owner's Group Id
-    'I>',  'num_links',         # Number of Links to File
-    'S>',  'projid_low',        # Lower Part of Owner's Project Id
-    'S>',  'projid_high',       # Higher Part of Owner's Project Id
-    'a6',  'pad',               # Unused, Zeroed Space
-    'S>',  'flush_iterator',    # Incremented on Flush
-    'I>',  'atime_secs',        # time last accessed seconds
-    'I>',  'atime_nsecs',       # time last accessed nanoseconds
-    'I>',  'mtime_secs',        # time last modified seconds
-    'I>',  'mtime_nsecs',       # time last modified nanoseconds
-    'I>',  'ctime_secs',        # time created / inode modified seconds
-    'I>',  'ctime_nsecs',       # time created / inode modified nanoseconds
-    'Q>',  'size',              # number of bytes in file
-    'Q>',  'nblocks',           # Number of direct & btree blocks used
-    'I>',  'extent_size',       # Basic/Minimum extent size for file
-    'I>',  'num_extents',       # Number of extents in data fork
-    'S>',  'attr_num_extents',  # Number of extents in attribute fork
-    'C',   'attr_fork_offset',  # Attribute Fork Offset, <<3 for 64b align
-    'c',   'attr_fork_format',  # Format of Attribute Fork's Data
-    'I>',  'dmig_event_mask',   # DMIG event mask
-    'S>',  'dmig_state_info',   # DMIG state info
-    'S>',  'flags',             # random flags, XFS_DIFLAG_...
-    'I>',  'gen_num',           # generation number
-    'I>',  'next_unlinked',     # agi unlinked list ptr
-  ])
-
-  EXTENDED_INODE = BinaryStruct.new([
-    'S>',  'magic',             # Inode Magic Number
-    'S>',  'file_mode',         # Mode and Type of file
-    'C',   'version',           # Inode Version
-    'C',   'format',            # Format of Data Fork Data
-    'S>',  'old_num_links',     # Old Number of Links to File
-    'I>',  'uid',               # Owner's User Id
-    'I>',  'gid',               # Owner's Group Id
-    'I>',  'num_links',         # Number of Links to File
-    'S>',  'projid_low',        # Lower Part of Owner's Project Id
-    'S>',  'projid_high',       # Higher Part of Owner's Project Id
-    'a6',  'pad',               # Unused, Zeroed Space
-    'S>',  'flush_iterator',    # Incremented on Flush
-    'I>',  'atime_secs',        # time last accessed seconds
-    'I>',  'atime_nsecs',       # time last accessed nanoseconds
-    'I>',  'mtime_secs',        # time last modified seconds
-    'I>',  'mtime_nsecs',       # time last modified nanoseconds
-    'I>',  'ctime_secs',        # time created / inode modified seconds
-    'I>',  'ctime_nsecs',       # time created / inode modified nanoseconds
-    'Q>',  'size',              # number of bytes in file
-    'Q>',  'nblocks',           # Number of direct & btree blocks used
-    'I>',  'extent_size',       # Basic/Minimum extent size for file
-    'I>',  'num_extents',       # Number of extents in data fork
-    'S>',  'attr_num_extents',  # Number of extents in attribute fork
-    'C',   'attr_fork_offset',  # Attribute Fork Offset, <<3 for 64b align
-    'c',   'attr_fork_format',  # Format of Attribute Fork's Data
-    'I>',  'dmig_event_mask',   # DMIG event mask
-    'S>',  'dmig_state_info',   # DMIG state info
-    'S>',  'flags',             # random flags, XFS_DIFLAG_...
-    'I>',  'gen_num',           # generation number
-    'I>',  'next_unlinked',     # agi unlinked list ptr
-    'I>',  'crc',               # CRC of the inode
-    'Q>',  'change_count',      # number of attribute changes
-    'Q>',  'lsn',               # flush sequence
-    'Q>',  'flags2',            # more random flags
-    'a16', 'pad2',              # more padding for future expansion
-    'I>',  'crtime_secs',       # time created seconds
-    'I>',  'crtime_nsecs',      # time created nanoseconds
-    'Q>',  'inode_number',      # inode number
-    'a16', 'uuid',              # UUID of the filesystem
-  ])
-
-  SIZEOF_INODE = INODE.size
-  SIZEOF_EXTENDED_INODE = EXTENDED_INODE.size
-
   # ////////////////////////////////////////////////////////////////////////////
   # // Class.
 
   class Inode
+    TIMESTAMP = BinaryStruct.new([
+      'I',  'seconds',           # timestamp seconds
+      'I',  'nanoseconds',       # timestamp nanoseconds
+    ])
+
+    INODE = BinaryStruct.new([
+      'S>',  'magic',             # Inode Magic Number
+      'S>',  'file_mode',         # Mode and Type of file
+      'C',   'version',           # Inode Version
+      'C',   'format',            # Format of Data Fork Data
+      'S>',  'old_num_links',     # Old Number of Links to File
+      'I>',  'uid',               # Owner's User Id
+      'I>',  'gid',               # Owner's Group Id
+      'I>',  'num_links',         # Number of Links to File
+      'S>',  'projid_low',        # Lower Part of Owner's Project Id
+      'S>',  'projid_high',       # Higher Part of Owner's Project Id
+      'a6',  'pad',               # Unused, Zeroed Space
+      'S>',  'flush_iterator',    # Incremented on Flush
+      'I>',  'atime_secs',        # time last accessed seconds
+      'I>',  'atime_nsecs',       # time last accessed nanoseconds
+      'I>',  'mtime_secs',        # time last modified seconds
+      'I>',  'mtime_nsecs',       # time last modified nanoseconds
+      'I>',  'ctime_secs',        # time created / inode modified seconds
+      'I>',  'ctime_nsecs',       # time created / inode modified nanoseconds
+      'Q>',  'size',              # number of bytes in file
+      'Q>',  'nblocks',           # Number of direct & btree blocks used
+      'I>',  'extent_size',       # Basic/Minimum extent size for file
+      'I>',  'num_extents',       # Number of extents in data fork
+      'S>',  'attr_num_extents',  # Number of extents in attribute fork
+      'C',   'attr_fork_offset',  # Attribute Fork Offset, <<3 for 64b align
+      'c',   'attr_fork_format',  # Format of Attribute Fork's Data
+      'I>',  'dmig_event_mask',   # DMIG event mask
+      'S>',  'dmig_state_info',   # DMIG state info
+      'S>',  'flags',             # random flags, XFS_DIFLAG_...
+      'I>',  'gen_num',           # generation number
+      'I>',  'next_unlinked',     # agi unlinked list ptr
+    ])
+
+    EXTENDED_INODE = BinaryStruct.new([
+      'S>',  'magic',             # Inode Magic Number
+      'S>',  'file_mode',         # Mode and Type of file
+      'C',   'version',           # Inode Version
+      'C',   'format',            # Format of Data Fork Data
+      'S>',  'old_num_links',     # Old Number of Links to File
+      'I>',  'uid',               # Owner's User Id
+      'I>',  'gid',               # Owner's Group Id
+      'I>',  'num_links',         # Number of Links to File
+      'S>',  'projid_low',        # Lower Part of Owner's Project Id
+      'S>',  'projid_high',       # Higher Part of Owner's Project Id
+      'a6',  'pad',               # Unused, Zeroed Space
+      'S>',  'flush_iterator',    # Incremented on Flush
+      'I>',  'atime_secs',        # time last accessed seconds
+      'I>',  'atime_nsecs',       # time last accessed nanoseconds
+      'I>',  'mtime_secs',        # time last modified seconds
+      'I>',  'mtime_nsecs',       # time last modified nanoseconds
+      'I>',  'ctime_secs',        # time created / inode modified seconds
+      'I>',  'ctime_nsecs',       # time created / inode modified nanoseconds
+      'Q>',  'size',              # number of bytes in file
+      'Q>',  'nblocks',           # Number of direct & btree blocks used
+      'I>',  'extent_size',       # Basic/Minimum extent size for file
+      'I>',  'num_extents',       # Number of extents in data fork
+      'S>',  'attr_num_extents',  # Number of extents in attribute fork
+      'C',   'attr_fork_offset',  # Attribute Fork Offset, <<3 for 64b align
+      'c',   'attr_fork_format',  # Format of Attribute Fork's Data
+      'I>',  'dmig_event_mask',   # DMIG event mask
+      'S>',  'dmig_state_info',   # DMIG state info
+      'S>',  'flags',             # random flags, XFS_DIFLAG_...
+      'I>',  'gen_num',           # generation number
+      'I>',  'next_unlinked',     # agi unlinked list ptr
+      'I>',  'crc',               # CRC of the inode
+      'Q>',  'change_count',      # number of attribute changes
+      'Q>',  'lsn',               # flush sequence
+      'Q>',  'flags2',            # more random flags
+      'a16', 'pad2',              # more padding for future expansion
+      'I>',  'crtime_secs',       # time created seconds
+      'I>',  'crtime_nsecs',      # time created nanoseconds
+      'Q>',  'inode_number',      # inode number
+      'a16', 'uuid',              # UUID of the filesystem
+    ])
+
+    SIZEOF_INODE = INODE.size
+    SIZEOF_EXTENDED_INODE = EXTENDED_INODE.size
+
     MAX_READ         = 4_294_967_296
     XFS_DINODE_MAGIC = 0x494e
 

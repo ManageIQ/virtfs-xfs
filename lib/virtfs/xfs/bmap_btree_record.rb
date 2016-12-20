@@ -1,12 +1,12 @@
 module VirtFS::XFS
-  BMAP_BTREE_REC = BinaryStruct.new([
-    'Q>',          'l0',
-    'Q>',          'l1',
-  ])
-
-  SIZEOF_BMAP_BTREE_REC   = 16
-
   class BmapBTreeRecord
+    BMAP_BTREE_REC = BinaryStruct.new([
+      'Q>',          'l0',
+      'Q>',          'l1',
+    ])
+
+    SIZEOF_BMAP_BTREE_REC   = 16
+
     BMBT_EXNTFLAG_BITLEN    = 1
     BMBT_STARTOFF_BITLEN    = 54
     BMBT_STARTBLOCK_BITLEN  = 52
