@@ -1,7 +1,7 @@
 # encoding: US-ASCII
 
 require 'binary_struct'
-require 'virt_disk/disk_uuid'
+require 'uuidtools'
 require 'stringio'
 require 'memory_buffer'
 
@@ -200,7 +200,7 @@ module VirtFS::XFS
       @allocation_group_blocks          = @sb['ag_blocks']
       @groups_count, @last_group_blocks = @sb['data_blocks'].divmod(@allocation_group_blocks)
       @groups_count += 1 if @last_group_blocks > 0
-      @filesystem_id = MiqUUID.parse_raw(@sb['uuid'])
+      @filesystem_id = UUIDTools::UUID.parse_raw(@sb['uuid'])
       @volume_name   = @sb['fs_name']
       @ialloc_inos   = (@sb['inodes_per_blk']..XFS_INODES_PER_CHUNK).max
       @ialloc_blks   = @ialloc_inos >> @sb['inodes_per_blk_log']

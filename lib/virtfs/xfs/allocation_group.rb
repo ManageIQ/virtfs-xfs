@@ -1,5 +1,4 @@
 require 'binary_struct'
-require 'virt_disk/disk_uuid'
 require 'stringio'
 require 'memory_buffer'
 
