@@ -1,6 +1,6 @@
 module VirtFS::XFS
   class FS
-    module FileMethods
+    module FileClassMethods
 
       def file_atime(p)
         de = get_file(p)
@@ -221,6 +221,6 @@ module VirtFS::XFS
 
         entry_cache[cache_name] = directory_entry
       end
-    end # module FileMethods
+    end # module FileClassMethods
   end   # class FS
 end     # module VirtFS::XFS

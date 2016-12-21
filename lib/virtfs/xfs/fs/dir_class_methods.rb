@@ -1,6 +1,6 @@
 module VirtFS::XFS
   class FS
-    module DirMethods
+    module DirClassMethods
       def dir_delete(p)
         raise "VirtFS::XFS Write functionality is not yet supported on XFS."
       end
@@ -74,6 +74,6 @@ module VirtFS::XFS
 
         dir_cache[fname] = dir
       end
-    end # module DirMethods
+    end # module DirClassMethods
   end   # class FS
 end     # module VirtFS::XFS
