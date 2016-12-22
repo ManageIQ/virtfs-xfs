@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   class Directory2DataHeader
     #
     # xfs_dir2_data_hdr consists of the magic number
@@ -21,4 +21,4 @@ module Virtfs::XFS
       @version_3     = false
     end
   end # class Directory3DataHeader
-end   # module Virtfs::XFS
+end   # module VirtFS::XFS

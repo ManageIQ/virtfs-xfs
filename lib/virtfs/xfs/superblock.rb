@@ -550,4 +550,4 @@ module VirtFS::XFS
       out
     end
   end # class Superblock
-end # module Virtfs::XFS
+end # module VirtFS::XFS

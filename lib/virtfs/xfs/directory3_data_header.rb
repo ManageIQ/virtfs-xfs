@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   class Directory3DataHeader
     DIRECTORY3_DATA_HEADER = BinaryStruct.new([
       'I>',  'magic',               # magic number
@@ -28,4 +28,4 @@ module Virtfs::XFS
       super
     end
   end # class Directory3DataHeader
-end   # module Virtfs::XFS
+end   # module VirtFS::XFS

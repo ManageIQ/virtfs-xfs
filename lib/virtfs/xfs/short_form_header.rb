@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   class ShortFormHeader
     #
     # Directory Entry when stored internal to an inode.
@@ -41,4 +41,4 @@ module Virtfs::XFS
       end
     end
   end # class ShortFormHeader
-end   # module Virtfs::XFS
+end   # module VirtFS::XFS

@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
   # // Class.
 
@@ -95,4 +95,4 @@ module Virtfs::XFS
       out
     end
   end # Class InodeMap
-end # Module Virtfs::XFS
+end # Module VirtFS::XFS

@@ -2,7 +2,7 @@ require 'binary_struct'
 require 'memory_buffer'
 require 'more_core_extensions/all'
 
-module Virtfs::XFS
+module VirtFS::XFS
   # ////////////////////////////////////////////////////////////////////////////
   # // Class.
 
@@ -526,4 +526,4 @@ module Virtfs::XFS
       @data_block_pointers
     end
   end # Class Inode
-end # Module Virtfs::XFS
+end # Module VirtFS::XFS

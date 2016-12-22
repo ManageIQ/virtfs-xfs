@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   class DirectoryBlockTail
     #
     # xfs_dir2_data_hdr consists of the magic number
@@ -19,4 +19,4 @@ module Virtfs::XFS
       @size  = SIZEOF_DIRECTORY_BLOCK_TAIL
     end
   end # class DirectoryBlockTail
-end   # module Virtfs::XFS
+end   # module VirtFS::XFS

@@ -1,4 +1,4 @@
-module Virtfs::XFS
+module VirtFS::XFS
   class DirectoryDataHeader
     DIRECTORY_DATA_FREE = BinaryStruct.new([
       'S>',  'offset',              # start of freespace
@@ -38,4 +38,4 @@ module Virtfs::XFS
       @header_end += version_header.pad
     end
   end # class DirectoryDataHeader
-end   # module Virtfs::XFS
+end   # module VirtFS::XFS

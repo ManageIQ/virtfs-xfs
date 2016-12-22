@@ -1,6 +1,6 @@
 require 'binary_struct'
 
-module Virtfs::XFS
+module VirtFS::XFS
   class DirectoryEntry
     # ////////////////////////////////////////////////////////////////////////////
     # // Data definitions.
@@ -103,4 +103,4 @@ module Virtfs::XFS
       out
     end
   end # class
-end # module Virtfs::XFS
+end # module VirtFS::XFS
