@@ -84,7 +84,7 @@ module VirtFS::XFS
       def file_lstat(p)
         de = get_file(p)
         raise Errno::ENOENT, "No such file or directory #{p}" if de.nil?
-        VirtFS::Stat.new(VirtFS::XFS::File.new(de, superblock).to_h)
+        VirtFS::Stat.new(entry_hash(de))
       end
 
       def file_mtime(p)
@@ -220,6 +220,14 @@ module VirtFS::XFS
         end
 
         entry_cache[cache_name] = directory_entry
+      end
+      
+      private
+
+      def entry_hash(de)
+        { :directory? => de.dir?,
+          :file?      => de.file?,
+          :symlink?   => de.symlink? }
       end
     end # module FileClassMethods
   end   # class FS
