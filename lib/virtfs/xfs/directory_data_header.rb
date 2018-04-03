@@ -27,8 +27,8 @@ module VirtFS::XFS
       @version_3 = version_header.version_3
       header_size = decode_directory_header(data, version_header)
       free_offset = header_size
-      @data_free    = []
-      @free_end     = 0
+      @data_free  = []
+      @free_end   = 0
       (1..XFS_DIR2_DATA_FD_COUNT).each do |i|
         @free_end     = header_size + SIZEOF_DIRECTORY_DATA_FREE * i
         @data_free[i] = DIRECTORY_DATA_FREE.decode(data[free_offset..@free_end])

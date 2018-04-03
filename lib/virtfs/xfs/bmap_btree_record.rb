@@ -5,15 +5,15 @@ module VirtFS::XFS
       'Q>',          'l1',
     ])
 
-    SIZEOF_BMAP_BTREE_REC   = 16
+    SIZEOF_BMAP_BTREE_REC = 16
 
-    BMBT_EXNTFLAG_BITLEN    = 1
-    BMBT_STARTOFF_BITLEN    = 54
-    BMBT_STARTBLOCK_BITLEN  = 52
-    BMBT_BLOCKCOUNT_BITLEN  = 21
+    EXNTFLAG_BITLEN   = 1
+    STARTOFF_BITLEN   = 54
+    STARTBLOCK_BITLEN = 52
+    BLOCKCOUNT_BITLEN = 21
 
-    XFS_EXT_NORM            = 0
-    XFS_EXT_UNWRITTEN       = 1
+    XFS_EXT_NORM      = 0
+    XFS_EXT_UNWRITTEN = 1
     attr_accessor   :key_ptr, :start_offset, :start_block, :big_start_block, :block_count, :flag
 
     def xfs_mask64lo(shift)
@@ -21,7 +21,7 @@ module VirtFS::XFS
     end
 
     def bmbt_state(doubleword)
-      flag = doubleword >> (64 - BMBT_EXNTFLAG_BITLEN)
+      flag = doubleword >> (64 - EXNTFLAG_BITLEN)
       return XFS_EXT_UNWRITTEN if flag > 0
       XFS_EXT_NORM
     end
@@ -31,7 +31,7 @@ module VirtFS::XFS
     end
 
     def bmbt_start_offset(doubleword)
-      (doubleword & xfs_mask64lo(64 - BMBT_EXNTFLAG_BITLEN)) >> 9
+      (doubleword & xfs_mask64lo(64 - EXNTFLAG_BITLEN)) >> 9
     end
 
     def bmbt_start_block(doubleword)

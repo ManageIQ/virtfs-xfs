@@ -16,5 +16,6 @@ require_relative "xfs/short_form_header"
 require_relative "xfs/superblock"
 
 require_relative "xfs/fs/base"
+require_relative "xfs/fs/file"
 require_relative "xfs/fs/file_class_methods"
 require_relative "xfs/fs/dir_class_methods"

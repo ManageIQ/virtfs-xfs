@@ -8,7 +8,7 @@ module VirtFS::XFS
   # // Class.
  
   class BmapBTreeBlock
-    BTREE_BLOCK_SHORT_NOCRC = BinaryStruct.new([
+    SHORT_HDR_NOCRC = BinaryStruct.new([
       #  Common BTree Block header information
       'I>',  'magic_num',          # magic number of the btree block type
       'S>',  'level',              # level number.  0 is a leaf
@@ -19,9 +19,9 @@ module VirtFS::XFS
       'I>',  'left_sibling',       #
       'I>',  'right_sibling',      #
     ])
-    SIZEOF_BTREE_BLOCK_SHORT_NOCRC = BTREE_BLOCK_SHORT_NOCRC.size
+    SIZEOF_SHORT_HDR_NOCRC = SHORT_HDR_NOCRC.size
 
-    BTREE_BLOCK_SHORT = BinaryStruct.new([
+    SHORT_HDR = BinaryStruct.new([
       #  Common BTree Block header information
       'I>',  'magic_num',          # magic number of the btree block type
       'S>',  'level',              # level number.  0 is a leaf
@@ -37,9 +37,9 @@ module VirtFS::XFS
       'I>',  'owner',              #
       'I>',  'crc',                #
     ])
-    SIZEOF_BTREE_BLOCK_SHORT = BTREE_BLOCK_SHORT.size
+    SIZEOF_SHORT_HDR = SHORT_HDR.size
 
-    BTREE_BLOCK_LONG_NOCRC = BinaryStruct.new([
+    LONG_HDR_NOCRC = BinaryStruct.new([
       #  Common BTree Block header information
       'I>',  'magic_num',          # magic number of the btree block type
       'S>',  'level',              # level number.  0 is a leaf
@@ -50,9 +50,9 @@ module VirtFS::XFS
       'Q>',  'left_sibling',       #
       'Q>',  'right_sibling',      #
     ])
-    SIZEOF_BTREE_BLOCK_LONG_NOCRC = BTREE_BLOCK_LONG_NOCRC.size
+    SIZEOF_LONG_HDR_NOCRC = LONG_HDR_NOCRC.size
 
-    BTREE_BLOCK_LONG = BinaryStruct.new([
+    LONG_HDR = BinaryStruct.new([
       #  Common BTree Block header information
       'I>',  'magic_num',          # magic number of the btree block type
       'S>',  'level',              # level number.  0 is a leaf
@@ -69,7 +69,7 @@ module VirtFS::XFS
       'I>',  'crc',                #
       'I>',  'pad',                #
     ])
-    SIZEOF_BTREE_BLOCK_LONG = BTREE_BLOCK_LONG.size
+    SIZEOF_LONG_HDR = LONG_HDR.size
 
     XFS_BTREE_LONG_PTRS = 1
     XFS_BMAP_MAGIC      = 0x424d4150
@@ -81,20 +81,20 @@ module VirtFS::XFS
       @sb = sb
       if defined? XFS_BTREE_LONG_PTRS
         if @sb.version_has_crc?
-          @btree_block = BTREE_BLOCK_LONG.decode(buffer)
+          @btree_block = LONG_HDR.decode(buffer)
         else
-          @btree_block = BTREE_BLOCK_LONG_NOCRC.decode(buffer)
+          @btree_block = LONG_HDR_NOCRC.decode(buffer)
         end
       else
         if sb.version_has_crc?
-          @btree_block = BTREE_BLOCK_SHORT.decode(buffer)
+          @btree_block = SHORT_HDR.decode(buffer)
         else
-          @btree_block = BTREE_BLOCK_SHORT_NOCRC.decode(buffer)
+          @btree_block = SHORT_HDR_NOCRC.decode(buffer)
         end
       end
-      @header_size   = btree_block_length
+      @header_size    = btree_block_length
       @number_records = @btree_block['num_recs']
-      @level         = @btree_block['level']
+      @level          = @btree_block['level']
       raise "Invalid BTreeBlock" unless (@btree_block['magic_num'] == XFS_BMAP_MAGIC) ||
                                         (@btree_block['magic_num'] == XFS_BMAP_CRC_MAGIC)
       @left_sibling  = @btree_block['left_sibling']
@@ -105,15 +105,15 @@ module VirtFS::XFS
     def btree_block_length
       if defined? XFS_BTREE_LONG_PTRS
         if @sb.version_has_crc?
-          len = SIZEOF_BTREE_BLOCK_LONG
+          len = SIZEOF_LONG_HDR
         else
-          len = SIZEOF_BTREE_BLOCK_LONG_NOCRC
+          len = SIZEOF_LONG_HDR_NOCRC
         end
       else
         if @sb.version_has_crc?
-          len = SIZEOF_BTREE_BLOCK_SHORT
+          len = SIZEOF_SHORT_HDR
         else
-          len = SIZEOF_BTREE_BLOCK_SHORT_NOCRC
+          len = SIZEOF_SHORT_HDR_NOCRC
         end
       end
       len

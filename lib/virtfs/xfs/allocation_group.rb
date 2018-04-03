@@ -9,7 +9,7 @@ module VirtFS::XFS
   # // Class.
  
   class AllocationGroup
-    AG_FREESPACE = BinaryStruct.new([
+    FREESPACE = BinaryStruct.new([
       #  Common allocation group header information
       'I>',  'magic_num',          # magic number of the filesystem
       'I>',  'version_num',        # header version
@@ -42,7 +42,7 @@ module VirtFS::XFS
       'I>',  'spare2',             # name for the filesystem
     ])
 
-    AG_INODEINFO = BinaryStruct.new([
+    INODEINFO = BinaryStruct.new([
       #  Common allocation group header information
       'I>',  'magic_num',          # magic number of the filesystem
       'I>',  'version_num',        # header version
@@ -76,7 +76,7 @@ module VirtFS::XFS
     # The third AG block contains the AG FreeList, an array
     # of block pointers to blocks owned by the allocation btree code.
     #
-    AG_FREELIST = BinaryStruct.new([
+    FREELIST = BinaryStruct.new([
       'I>',  'magic_num',          # magic number of the filesystem
       'I>',  'seq_no',             # sequence # starting from 0
       'a16', 'uuid',               # Filesystem uuid
@@ -84,11 +84,11 @@ module VirtFS::XFS
       'I>',  'crc',                # CRC of alloc group inode info sector
       'I>',  'bno',                # actually XFS_AGFL_SIZE
     ])
-    AG_FL_STRUCT_SIZE = AG_FREELIST.size
+    FL_STRUCT_SIZE = FREELIST.size
 
-    AG_FREESPACE_SIZE = 512
-    AG_INODEINFO_SIZE = 512
-    AG_FREELIST_SIZE  = 512
+    FREESPACE_SIZE = 512
+    INODEINFO_SIZE = 512
+    FREELIST_SIZE  = 512
 
     XFS_AGF_MAGIC                          = 0x58414746
     XFS_AGI_MAGIC                          = 0x58414749
@@ -105,12 +105,12 @@ module VirtFS::XFS
       #
       @stream = stream
 
-      @agf                    = AG_FREESPACE.decode(@stream.read(AG_FREESPACE_SIZE))
-      @stream.seek(AG_FREESPACE_SIZE, IO::SEEK_CUR)
-      @agi                    = AG_INODEINFO.decode(@stream.read(AG_INODEINFO_SIZE))
-      @stream.seek(AG_INODEINFO_SIZE, IO::SEEK_CUR)
-      @agfl                   = AG_FREELIST.decode(@stream.read(AG_FREELIST_SIZE))
-      @stream.seek(-(AG_FREESPACE_SIZE + AG_INODEINFO_SIZE + AG_FREELIST_SIZE))
+      @agf = FREESPACE.decode(@stream.read(FREESPACE_SIZE))
+      @stream.seek(FREESPACE_SIZE, IO::SEEK_CUR)
+      @agi = INODEINFO.decode(@stream.read(INODEINFO_SIZE))
+      @stream.seek(INODEINFO_SIZE, IO::SEEK_CUR)
+      @agfl = FREELIST.decode(@stream.read(FREELIST_SIZE))
+      @stream.seek(-(FREESPACE_SIZE + INODEINFO_SIZE + FREELIST_SIZE))
       @allocation_group_block = @stream.read(sb['block_size'])
 
       # Grab some quick facts & make sure there's nothing wrong. Tight qualification.
