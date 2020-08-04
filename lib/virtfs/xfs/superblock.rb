@@ -7,6 +7,7 @@ require 'memory_buffer'
 require 'fs/xfs/allocation_group'
 require 'fs/xfs/inode_map'
 require 'fs/xfs/inode'
+require 'uuidtools'
 
 require 'rufus/lru'
 
