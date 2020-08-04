@@ -1,7 +1,6 @@
 # encoding: US-ASCII
 
 require 'binary_struct'
-require 'util/miq-uuid'
 require 'stringio'
 require 'memory_buffer'
 require 'fs/xfs/allocation_group'
