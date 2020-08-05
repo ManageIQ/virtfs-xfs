@@ -1,12 +1,12 @@
 # encoding: US-ASCII
 
 require 'binary_struct'
-require 'util/miq-uuid'
 require 'stringio'
 require 'memory_buffer'
 require 'fs/xfs/allocation_group'
 require 'fs/xfs/inode_map'
 require 'fs/xfs/inode'
+require 'uuidtools'
 
 require 'rufus/lru'
 
@@ -203,7 +203,7 @@ module XFS
       @allocation_group_blocks          = @sb['ag_blocks']
       @groups_count, @last_group_blocks = @sb['data_blocks'].divmod(@allocation_group_blocks)
       @groups_count += 1 if @last_group_blocks > 0
-      @filesystem_id                    = MiqUUID.parse_raw(@sb['uuid'])
+      @filesystem_id                    = UUIDTools::UUID.parse_raw(@sb['uuid'])
       @volume_name                      = @sb['fs_name']
       @ialloc_inos                      = (@sb['inodes_per_blk']..XFS_INODES_PER_CHUNK).max
       @ialloc_blks                      = @ialloc_inos >> @sb['inodes_per_blk_log']
